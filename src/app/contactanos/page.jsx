@@ -1,4 +1,7 @@
-const contactanos = () => (
-    <h2 className="text-white">Contactanos</h2>
+const { default: ContactUs } = require("@/components/ContactUs/ContactUs");
+
+const contactUsPage = () => (
+    <ContactUs/>
 )
-export default contactanos
+
+export default contactUsPage

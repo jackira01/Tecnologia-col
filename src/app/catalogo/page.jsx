@@ -1,19 +1,33 @@
-import CardComponent from "@/components/CardComponent/CardComponent";
-import SideBarComponent from "@/components/SideBar/SideBarComponent";
-import { initialValues } from "@/utils";
+"use client";
 
-const catalogo = () => {
+import CardsComponent from "@/components/CardComponent/CardsComponent";
+import SideBarComponent from "@/components/SideBar/SideBarComponent";
+import { ProductContext } from "@/context/productContext";
+import { getProducts } from "@/services/products";
+import { Spinner } from "flowbite-react";
+import { useContext, useEffect } from "react";
+
+const catalogoPage = () => {
+	const { setProducts, loaderProducts, setLoaderProducts } =
+		useContext(ProductContext);
+
 	return (
-		<div className="flex mt-5">
-			<SideBarComponent />
-			<div className="gap-10 grid grid-cols-3 h-[90%] w-screen mx-[12%]">
-				{initialValues.map((card) => (
-					/* Arreglar el tamaño maximo y minimo de la card */
-					<CardComponent key={card.id} data={card} />
-				))}
-			</div>
-		</div>
+		<>
+			{loaderProducts ? (
+				<div className="flex mt-5 max-w-[1024px] h-[90vh] justify-center items-center">
+					<Spinner size="xl" />
+					<h1 className="text-lg text-white font-semibold mx-2">
+						Cargando Productos
+					</h1>
+				</div>
+			) : (
+				<div className="flex mt-5 max-w-[1024px] h-[90vh]">
+					<SideBarComponent className="bg-[#31363F]" />
+					<CardsComponent />
+				</div>
+			)}
+		</>
 	);
 };
 
-export default catalogo;
+export default catalogoPage;
