@@ -2,7 +2,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Overlay from "./Overlay";
 import { ThemeModeScript } from "flowbite-react";
-const inter = Inter({ subsets: ["latin"] });
+import { Toaster } from "react-hot-toast";
+import { ProductProvider } from "@/context/productContext";
 
 export const metadata = {
   title: "Colombia portatiles",
@@ -11,15 +12,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-       <head>
+    <html lang="es">
+      <head>
         <ThemeModeScript />
       </head>
-      <body className={inter.className}>
-      <Overlay>
+      <body className="bg-mainDark-bg" >
+        <Overlay>
+          <Toaster position="bottom-center" />
+          <ProductProvider>
             {children}
-          </Overlay>
-
+          </ProductProvider>
+        </Overlay>
       </body>
     </html>
   );
