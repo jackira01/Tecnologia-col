@@ -9,7 +9,7 @@ import { ModalForm } from "./Forms/ModalForm";
 
 const Dashboard = () => {
 	const { products } = useContext(ProductContext);
-	const [openModal, setOpenModal] = useState(true);
+	const [openModal, setOpenModal] = useState(false);
 
 	return (
 		<div className="overflow-x-auto">
@@ -36,6 +36,11 @@ const Dashboard = () => {
 								<Table.Cell>${product.price.minimun}</Table.Cell>
 								<Table.Cell>${product.price.sale}</Table.Cell>
 								<Table.Cell>{product.createdOn}</Table.Cell>
+								<Table.Cell>
+									<Button onClick={setOpenModal}>
+										<MdOutlineEdit size={20}/>
+									</Button>
+								</Table.Cell>
 							</Table.Row>
 						))}
 					</Table.Body>

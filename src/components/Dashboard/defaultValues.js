@@ -4,5 +4,6 @@ export const headTitle = [
     { key: 3, label: "Precio Compra" },
     { key: 4, label: "Precio minimo" },
     { key: 5, label: "Precio Venta" },
-    { key: 6, label: "Tiempo Activo" }
+    { key: 6, label: "Tiempo Activo" },
+    { key: 7, label: "Opciones" }
 ]
