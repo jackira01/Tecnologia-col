@@ -9,12 +9,14 @@ export const ProductProvider = ({ children }) => {
 	const [products, setProducts] = useState([]);
 	const [loaderProducts, setLoaderProducts] = useState(false);
 	const [openModal, setOpenModal] = useState(false);
+	const [totalPages, setTotalPages] = useState(1);
 
 	useEffect(() => {
 		const fetchProducts = async () => {
 			setLoaderProducts(true);
 			const response = await getProducts();
-			setProducts(response);
+			setTotalPages(response.totalPages);
+			setProducts(response.docs);
 			setLoaderProducts(false);
 		};
 		fetchProducts();
@@ -29,6 +31,8 @@ export const ProductProvider = ({ children }) => {
 				setLoaderProducts,
 				openModal,
 				setOpenModal,
+				totalPages,
+				setTotalPages
 			}}
 		>
 			{children}

@@ -4,18 +4,18 @@ import { HiMiniCpuChip } from "react-icons/hi2";
 import { BsDeviceHdd } from "react-icons/bs";
 import Link from "next/link";
 
-const CardComponent = ({ data }) => {
+export const CardComponent = ({ data }) => {
 	return (
 		<Card
 			key={data._id}
-			className="max-w-sm border-none font-sans text-mainDark-white w-[278px] min-h-[520px]"
+			className="max-w-sm border-none font-sans text-mainDark-white w-[278px] amin-h-[520px]"
 			imgAlt="Meaningful alt text for an image that is not purely decorative"
-			imgSrc={data.image}
+			imgSrc={data.image_URL}
 		>
 			<h2 className="text-lg font-bold tracking-tight text-mainDark-text">
 				{data.name}
 			</h2>
-			<h2 className="text-xl font-serif font-bold">${data.price.sale}</h2>
+			<h2 className="text-lg font-serif font-bold">${data.price.sale}</h2>
 			<div className="flex">
 				<RiRam2Line className="mr-2" fontSize={25} />
 				<p>
@@ -30,7 +30,7 @@ const CardComponent = ({ data }) => {
 			</div>
 			<div className="flex">
 				<HiMiniCpuChip className="mr-2" fontSize={25} />
-				<p>{data.specification.processor.brand} {data.specification.processor.model}</p> 
+				<p>{data.specification.cpu.brand} {data.specification.cpu.model}</p> 
 			</div>
 
 			<div className="flex justify-center items-center">
@@ -44,5 +44,3 @@ const CardComponent = ({ data }) => {
 		</Card>
 	);
 };
-
-export default CardComponent;
