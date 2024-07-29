@@ -1,11 +1,14 @@
 "use client";
 
 import { getProducts } from "@/services/products";
+import { defaultValuesForm } from "@/utils";
 import { createContext, useEffect, useState } from "react";
 
 export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
+	const [initialFormValues, setInitialFormValues] = useState(defaultValuesForm);
+	const [isEdit, setIsEdit] = useState(false);
 	const [products, setProducts] = useState([]);
 	const [loaderProducts, setLoaderProducts] = useState(false);
 	const [openModal, setOpenModal] = useState(false);
@@ -32,7 +35,11 @@ export const ProductProvider = ({ children }) => {
 				openModal,
 				setOpenModal,
 				totalPages,
-				setTotalPages
+				setTotalPages,
+				initialFormValues,
+				setInitialFormValues,
+				isEdit,
+				setIsEdit,
 			}}
 		>
 			{children}

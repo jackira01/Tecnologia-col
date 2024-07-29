@@ -7,21 +7,31 @@ export const getProducts = async (page) => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/laptop-product/?page=${newPage}`)
         return response.data
     } catch (error) {
-        console.log(error);
-        return error
+        console.log(error.response.data.message);
+        toast.error("Ups! Algo paso...")
     }
 }
 
 export const createProducts = async (data) => {
-    return toast.promise(axios.post(`${process.env.NEXT_PUBLIC_API_URL}/laptop-product/create`, data), {
-        loading: 'Creando Producto...',
-        success: (response) => response.data.message,
-        error: (error) => {
-            if (error.response) {
-                return error.response.data.message;
-            }
-            return error.message;
-        },
-    })
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/laptop-product/create`, data)
+        toast.success(response.data.message)
+        return response.data.product
+    } catch (error) {
+        console.log(error.response.data.message);
+        toast.error("Ups! Algo paso...")
+    }
+
+}
+
+export const updateProducts = async (data) => {
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/laptop-product/update/${data._id}`, data)
+        toast.success(response.data.message)
+        return response.data.product
+    } catch (error) {
+        console.log(error.response.data.message);
+        toast.error("Ups! Algo paso...")
+    }
 
 }

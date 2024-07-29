@@ -1,97 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import axios from "axios";
-import {
-	Button,
-	FileInput,
-	Label,
-	Select,
-	Spinner,
-	TextInput,
-} from "flowbite-react";
-import { Field, Form, Formik } from "formik";
-import { CustomCurrencyInput } from "./CustomComponents/CustomCurrencyInput";
-import { defaultValuesForm } from "@/utils";
+import { Button, FileInput, Label, Select, Spinner } from "flowbite-react";
+import { Form, Formik } from "formik";
+import { defaultValuesForm, parseData } from "@/utils";
 import { CurrencyField, TextInputField } from "./CustomComponents/CustomInputs";
+import { CreateProductSchema } from "@/Helpers/SchemasValidation";
+import {
+	createProducts,
+	getProducts,
+	updateProducts,
+} from "@/services/products";
+import { ProductContext } from "@/context/productContext";
 
 export const FormComponent = () => {
-	const [image, setImage] = useState(null);
-	const [cloudLoader, setCloudLoader] = useState(false);
+	const { initialFormValues, setInitialFormValues, isEdit, setProducts } =
+		useContext(ProductContext);
+	const [isSubmiting, setIsSubmiting] = useState(false);
 
-	const handleImageChange = (e) => {
-		setImage(e.target.files[0]);
-	};
-
-	const uploadImage = async () => {
-		setCloudLoader(true);
+	const uploadImage = async (image) => {
 		const formData = new FormData();
 		formData.append("file", image);
 		formData.append("upload_preset", "tecnologia col");
 
-		const response = await axios.post(
-			"https://api.cloudinary.com/v1_1/di6qf8c06/image/upload",
-			formData,
-		);
-
-		// Usando setValue para actualizar el valor del input
-		setValue("imageUrl", response.data.secure_url);
-
-		console.log("response", response.data.secure_url);
-
-		setCloudLoader(false);
+		try {
+			const response = await axios.post(
+				"https://api.cloudinary.com/v1_1/di6qf8c06/image/upload",
+				formData,
+			);
+			return response.data.secure_url;
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	const onSubmit = async (data) => {
-		// await uploadImage();
-		console.log(data);
-		// createProducts(parseData(data));
+		setIsSubmiting(true);
+		if (isEdit) {
+			const updataImage =
+				typeof data.image_URL === "string"
+					? data.image_URL
+					: await uploadImage(data.image_URL);
+
+			const newObj = parseData({
+				...data,
+				image_URL: updataImage,
+			});
+
+			console.log({ ...newObj, _id: data._id });
+			const updateData = await updateProducts({ ...newObj, _id: data._id });
+			setProducts((prev) => ({
+				...prev,
+				updateData,
+			}));
+			setInitialFormValues(defaultValuesForm);
+			setIsSubmiting(false);
+		} else {
+			const updataImage = await uploadImage(data.image_URL);
+			const newProduct = await createProducts(
+				parseData({ ...data, image_URL: updataImage }),
+			);
+			setProducts((prev) => ({
+				...prev,
+				newProduct,
+			}));
+			setInitialFormValues(defaultValuesForm);
+			setIsSubmiting(false);
+		}
 	};
 	return (
 		<Formik
-			initialValues={defaultValuesForm}
+			initialValues={initialFormValues}
 			className="grid grid-cols-2 gap-4 "
 			onSubmit={onSubmit}
+			validationSchema={CreateProductSchema}
 		>
-			{({ values, errors, handleChange, handleSubmit, setFieldValue }) => (
+			{({ values, errors, handleSubmit, setFieldValue, touched }) => (
 				<Form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
 					<TextInputField
 						keyValue={"name"}
-						valueForm={values.name.value}
+						valueForm={values.name}
 						setFieldValue={setFieldValue}
 						labelName={"Nombre de Producto"}
+						error_message={errors.name && touched.name ? errors.name : ""}
 					/>
 
 					<CurrencyField
 						keyValue={"price_buy"}
-						valueForm={values.price_buy.value}
+						valueForm={values.price_buy}
 						setFieldValue={setFieldValue}
 						labelName={"Precio De Compra"}
 					/>
 
 					<CurrencyField
 						keyValue={"price_minimun"}
-						valueForm={values.price_minimun.value}
+						valueForm={values.price_minimun}
 						setFieldValue={setFieldValue}
 						labelName={"Precio Minimo"}
 					/>
 
 					<CurrencyField
 						keyValue={"price_sale"}
-						valueForm={values.price_sale.value}
+						valueForm={values.price_sale}
 						setFieldValue={setFieldValue}
 						labelName={"Precio De Venta"}
 					/>
 
 					<div className="mb-2 block lg:col-span-2">
-						<Label htmlFor="image" value="Upload file" className="text-base" />
+						<Label
+							htmlFor="image_URL"
+							value="Subir Imagen"
+							className="text-base"
+						/>
 						<FileInput
-							id="image"
-							name="image_URL"
-							helperText="Coloca imagenes sin fondo"
-							onChange={handleImageChange}
-							value={values.image_URL}
+							id="image_URL"
+							helperText={
+								<>
+									<span className="font-medium text-yellow-300">
+										{errors.image_URL && touched.image_URL
+											? errors.image_URL
+											: ""}
+									</span>
+								</>
+							}
+							onChange={(e) => setFieldValue("image_URL", e.target.files[0])}
 						/>
 					</div>
 
@@ -111,7 +145,7 @@ export const FormComponent = () => {
 							onChange={(e) => setFieldValue("product_status", e.target.value)}
 							value={values.product_status}
 						>
-							<option selected value="nuevo">Nuevo</option>
+							<option value="nuevo">Nuevo</option>
 							<option value="usado">Usado</option>
 						</Select>
 					</div>
@@ -130,7 +164,7 @@ export const FormComponent = () => {
 						>
 							<option value="Windows 7">Windows 7</option>
 							<option value="Windows 8">Windows 8</option>
-							<option selected value="Windows 10">Windows 10</option>
+							<option value="Windows 10">Windows 10</option>
 							<option value="Windows 11">Windows 11</option>
 						</Select>
 					</div>
@@ -148,7 +182,7 @@ export const FormComponent = () => {
 							value={values.ram_size}
 						>
 							<option value="2GB">2 RAM</option>
-							<option selected value="4GB">4 RAM</option>
+							<option value="4GB">4 RAM</option>
 							<option value="6GB">6 RAM</option>
 							<option value="8GB">8 RAM</option>
 							<option value="10GB">10 RAM</option>
@@ -171,7 +205,7 @@ export const FormComponent = () => {
 							value={values.ram_type}
 						>
 							<option>DDR2</option>
-							<option >DDR3</option>
+							<option>DDR3</option>
 							<option>DDR4</option>
 						</Select>
 					</div>
@@ -219,6 +253,9 @@ export const FormComponent = () => {
 						valueForm={values.cpu_brand}
 						setFieldValue={setFieldValue}
 						labelName={"Marca de CPU"}
+						error_message={
+							errors.cpu_brand && touched.cpu_brand ? errors.cpu_brand : ""
+						}
 					/>
 
 					<TextInputField
@@ -226,6 +263,9 @@ export const FormComponent = () => {
 						valueForm={values.cpu_model}
 						setFieldValue={setFieldValue}
 						labelName={"Modelo de CPU"}
+						error_message={
+							errors.cpu_model && touched.cpu_model ? errors.cpu_model : ""
+						}
 					/>
 
 					<TextInputField
@@ -233,6 +273,7 @@ export const FormComponent = () => {
 						valueForm={values.brand}
 						setFieldValue={setFieldValue}
 						labelName={"Marca De Portatil"}
+						error_message={errors.brand && touched.brand ? errors.brand : ""}
 					/>
 
 					<div className="mb-2 block">
@@ -268,6 +309,11 @@ export const FormComponent = () => {
 						valueForm={values.screen_size}
 						setFieldValue={setFieldValue}
 						labelName={"Pulgadas de Pantalla"}
+						error_message={
+							errors.screen_size && touched.screen_size
+								? errors.screen_size
+								: ""
+						}
 					/>
 
 					<TextInputField
@@ -282,12 +328,22 @@ export const FormComponent = () => {
 						valueForm={values.description}
 						setFieldValue={setFieldValue}
 						labelName={"Descripcion"}
+						error_message={
+							errors.description && touched.description
+								? errors.description
+								: ""
+						}
 					/>
 
-					{errors && console.log(errors)}
-					<Button className="col-span-2" type="submit">
-						Crear Producto
-					</Button>
+					{isSubmiting ? (
+						<div className="flex col-span-2 items-center justify-center">
+							<Spinner />
+						</div>
+					) : (
+						<Button className="col-span-2" type="submit">
+							{isEdit ? "Actualizar Producto" : "Crear Producto"}
+						</Button>
+					)}
 				</Form>
 			)}
 		</Formik>

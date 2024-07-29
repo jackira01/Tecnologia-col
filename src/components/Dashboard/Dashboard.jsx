@@ -5,7 +5,7 @@ import { MdOutlineEdit } from "react-icons/md";
 import { headTitle } from "./defaultValues";
 import { useContext, useEffect, useState } from "react";
 import { ProductContext } from "@/context/productContext";
-import { parseDate } from "@/utils";
+import { parseDataToModal, parseDate } from "@/utils";
 import { ProductPagination } from "../Pagination/ProductPagination";
 import { getProducts } from "@/services/products";
 import { IoAddCircleOutline } from "react-icons/io5";
@@ -18,6 +18,8 @@ const Dashboard = () => {
 		setLoaderProducts,
 		setProducts,
 		setTotalPages,
+		setInitialFormValues,
+		setIsEdit,
 	} = useContext(ProductContext);
 	const [openModal, setOpenModal] = useState(false);
 
@@ -37,6 +39,13 @@ const Dashboard = () => {
 		};
 	}, [setLoaderProducts, setProducts, setTotalPages]);
 
+	const handleClickEdit = (product) => {
+		const parsedObj = parseDataToModal(product);
+		setInitialFormValues(parsedObj);
+		setIsEdit(true);
+		setOpenModal(true);
+	};
+
 	return (
 		<div className="overflow-x-auto">
 			{loaderProducts ? (
@@ -45,7 +54,7 @@ const Dashboard = () => {
 				<>
 					<div className="flex gap-2">
 						<Button onClick={setOpenModal}>
-							<IoAddCircleOutline size={20} className="mx-2"/>
+							<IoAddCircleOutline size={20} className="mx-2" />
 							Crear Producto
 						</Button>
 						<Button>DEMO</Button>
@@ -75,7 +84,7 @@ const Dashboard = () => {
 									<Table.Cell>
 										<Button
 											className="bg-inherit dark:bg-inherit"
-											onClick={setOpenModal}
+											onClick={(e) => handleClickEdit(product)}
 										>
 											<MdOutlineEdit size={20} />
 										</Button>

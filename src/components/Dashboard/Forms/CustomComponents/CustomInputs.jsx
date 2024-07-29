@@ -1,4 +1,3 @@
-import { Field } from "formik";
 import { CustomCurrencyInput } from "./CustomCurrencyInput";
 import { Label, TextInput } from "flowbite-react";
 
@@ -12,10 +11,7 @@ export const CurrencyField = ({
 		<Label htmlFor={keyValue} value={labelName} className="text-base" />
 		<CustomCurrencyInput
 			onValueChange={(value, name, values) => {
-				setFieldValue(keyValue, {
-					value: value,
-					formattedValue: values.formatted,
-				});
+				setFieldValue(keyValue, value);
 			}}
 			value={valueForm}
 		/>
@@ -27,6 +23,7 @@ export const TextInputField = ({
 	valueForm,
 	setFieldValue,
 	labelName,
+	error_message,
 }) => (
 	<div className="mb-2 block">
 		<Label htmlFor={keyValue} value={labelName} className="text-base" />
@@ -36,6 +33,11 @@ export const TextInputField = ({
 			name={keyValue}
 			onChange={(e) => setFieldValue(keyValue, e.target.value)}
 			value={valueForm}
+			helperText={
+				<>
+					<span className="font-medium text-yellow-300">{error_message}</span>
+				</>
+			}
 		/>
 	</div>
 );

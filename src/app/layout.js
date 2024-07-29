@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-mainDark-bg" >
         <Overlay>
-          <Toaster position="bottom-center" />
+          <Toaster position="top-right" />
           <ProductProvider>
             {children}
           </ProductProvider>

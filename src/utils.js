@@ -67,10 +67,10 @@ export const parseData = (data) => (
             buy: data.price_buy,
             sale: data.price_sale,
         },
-        image_URL: data.imageUrl,
+        image_URL: data.image_URL,
         specification: {
             specification_URL: data.specification_URL,
-            product_status: data.pruduct_status,
+            product_status: data.product_status,
             charger: data.charger,
             battery: data.battery,
             so: data.so,
@@ -93,9 +93,32 @@ export const parseData = (data) => (
     }
 )
 
+export const parseDataToModal = (data) => ({
+    _id: data._id,
+    name: data.name || '',
+    price_minimun: data.price.minimun || '0',
+    price_sale: data.price.sale || '0',
+    price_buy: data.price.buy || '0',
+    image_URL: data.image_URL || '',
+    product_status: data.specification.product_status || '',
+    so: data.specification.so || '',
+    ram_size: data.specification.ram.size || '',
+    ram_type: data.specification.ram.ram_type || '',
+    storage_size: data.specification.storage.size || '',
+    storage_type: data.specification.storage.storage_type || '',
+    cpu_brand: data.specification.cpu.brand || '',
+    cpu_model: data.specification.cpu.model || '',
+    brand: data.specification.brand || '',
+    charger: data.specification.charger || true,
+    battery: data.specification.battery || true,
+    screen_size: data.specification.screen_size || '',
+    specification_URL: data.specification.specification_URL || '',
+    description: data.specification.general_description || ''
+})
+
 export const parseDate = (date) => {
     const parseDate = format(currentDate, "YYYY-MM-DD", "es")
-    const diff = diffDays( parseDate, date)
+    const diff = diffDays(parseDate, date)
     const dia = diff >= 10 ? "Dias" : "Dia"
     return `${parseDate} ( ${diff} ${dia} )`
 }
@@ -104,7 +127,8 @@ export const defaultValuesForm = {
     name: "",
     price_minimun: "0",
     price_sale: "0",
-    imageUrl: "0",
+    price_buy: "0",
+    image_URL: "",
     product_status: "nuevo",
     so: "windows 7",
     ram_size: "2GB",
@@ -119,5 +143,4 @@ export const defaultValuesForm = {
     screen_size: "",
     specification_URL: "",
     description: "",
-    price_buy: "",
 }

@@ -40,8 +40,8 @@ export const Catalogo = () => {
 					<CardComponent key={card._id} data={card} />
 				))
 			)}
-			<div className="col-start-2">
-				<ProductPagination />
+			<div className="col-span-3">
+				<ProductPagination  />
 			</div>
 		</div>
 	);
