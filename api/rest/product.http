@@ -1,0 +1,45 @@
+
+@url = http://localhost:3001
+
+### GET product
+GET {{url}}/laptop-product/
+
+### POST product
+POST {{url}}/laptop-product/create
+content-type: application/json
+
+{
+    "name": "PORTATIL LG CORE I3",
+    "sale_status": "disponible",
+    "price": {
+            "minimun": "120.000",
+            "buy": "100.000",
+            "sale": "120.000"
+        },
+    "image": "https://i.blogs.es/0d4873/image-removebg-preview-16-/original.png",
+    "specification": {
+        "specification_URL": "URL",
+        "product_status": "nuevo",
+        "charger": true,
+        "battery": true,
+        "so": "windows 10",
+        "brand": "SAMSUNG",
+        "screen_size": "12 pulgadas",
+        "ram": {
+            "size": "8GB",
+            "ram_type": "DDR3"
+        },
+        "storage": {
+            "size": "200GB",
+            "storage_type": "SSD"
+        },
+        "processor": {
+            "brand": "INTEL",
+            "model": "ss422"
+        },
+        "general_description": "descripcion"
+    }
+    
+}
+
+
