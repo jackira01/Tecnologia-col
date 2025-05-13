@@ -4,12 +4,12 @@ export const CreateProductSchema = Yup.object().shape({
     name: Yup.mixed()
         .required('Nombre requerido'),
 
-    cpu_brand: Yup.string()
+    processor_brand: Yup.string()
         .min(2, 'Muy corto!')
         .max(50, 'Muy largo!')
         .required('Marca requerida'),
 
-    cpu_model: Yup.string()
+    processor_model: Yup.string()
         .min(2, 'Muy corto!')
         .max(50, 'Muy largo!'),
 

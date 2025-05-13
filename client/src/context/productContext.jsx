@@ -7,7 +7,7 @@ import { createContext, useEffect, useState } from 'react'
 export const ProductContext = createContext()
 
 export const ProductProvider = ({ children }) => {
-  const [initialFormValues, setInitialFormValues] = useState(defaultValuesForm)
+  const [currentProduct, setCurrentProduct] = useState(defaultValuesForm)
   const [isEdit, setIsEdit] = useState(false)
   const [products, setProducts] = useState([])
   const [loaderProducts, setLoaderProducts] = useState(true)
@@ -44,8 +44,8 @@ export const ProductProvider = ({ children }) => {
         setOpenModal,
         totalPages,
         setTotalPages,
-        initialFormValues,
-        setInitialFormValues,
+        currentProduct,
+        setCurrentProduct,
         isEdit,
         setIsEdit,
         error,
