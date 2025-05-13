@@ -19,7 +19,7 @@ export const ProductPagination = () => {
   }
 
   return (
-    <div className='col-span-3'>
+    <div className='col-span-3 mt-10 flex w-full items-center justify-center'>
       {loaderProducts ? (
         <Spinner size='md' />
       ) : (
