@@ -7,6 +7,11 @@ const STRING_TYPE_REQUIRE = {
     require: true
 }
 
+const NUMBER_TYPE_REQUIRE = {
+    type: Number,
+    require: true
+}
+
 const STRING_TYPE = {
     type: String,
 }
@@ -20,9 +25,9 @@ const LaptopProductSchema = new Schema(
             enum: ["vendido", "disponible"],
         },
         price: {
-            minimun: STRING_TYPE_REQUIRE,
-            buy: STRING_TYPE_REQUIRE,
-            sale: STRING_TYPE_REQUIRE
+            minimun: NUMBER_TYPE_REQUIRE,
+            buy: NUMBER_TYPE_REQUIRE,
+            sale: NUMBER_TYPE_REQUIRE
         },
         image_URL: STRING_TYPE_REQUIRE,
         specification: {
