@@ -55,12 +55,11 @@ const LaptopProductSchema = new Schema(
                 size: STRING_TYPE_REQUIRE,
                 storage_type: STRING_TYPE_REQUIRE
             },
-            cpu: {
+            processor: {
                 brand: STRING_TYPE_REQUIRE,
                 model: STRING_TYPE_REQUIRE
             },
             general_description: STRING_TYPE,
-
         },
         createdOn: STRING_TYPE_REQUIRE
 

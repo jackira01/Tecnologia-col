@@ -18,7 +18,7 @@ const Dashboard = () => {
     setLoaderProducts,
     setProducts,
     setTotalPages,
-    setInitialFormValues,
+    setCurrentProduct,
     setIsEdit,
   } = useContext(ProductContext)
   const [openModal, setOpenModal] = useState(false)
@@ -41,7 +41,7 @@ const Dashboard = () => {
 
   const handleClickEdit = product => {
     const parsedObj = parseDataToModal(product)
-    setInitialFormValues(parsedObj)
+    setCurrentProduct(parsedObj)
     setIsEdit(true)
     setOpenModal(true)
   }
