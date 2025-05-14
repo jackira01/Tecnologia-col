@@ -1,10 +1,10 @@
-import {Router} from "express";
-import { getProduct } from "../controllers/product/getProduct.js";
-import { putProduct } from "../controllers/product/putProduct.js";
-import { postProduct } from "../controllers/product/postProduct.js";
+import { Router } from 'express';
+import { getProduct } from '../controllers/product/getProduct.js';
+import { postProduct } from '../controllers/product/postProduct.js';
+import { putProduct } from '../controllers/product/putProduct.js';
 
-export const laptopProductRouter = Router()
+export const laptopProductRouter = Router();
 
-laptopProductRouter.get("/", getProduct)
-laptopProductRouter.post("/create", postProduct)
-laptopProductRouter.post("/update/:id", putProduct)
+laptopProductRouter.get('/', getProduct);
+laptopProductRouter.post('/create', postProduct);
+laptopProductRouter.post('/update/:id', putProduct);
