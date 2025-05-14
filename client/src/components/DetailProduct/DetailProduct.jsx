@@ -1,5 +1,5 @@
-import { Button } from "flowbite-react";
-import CarouselComponent from "./carousel/CarouselComponent";
+import { Button } from 'flowbite-react';
+import CarouselComponent from './carousel/CarouselComponent';
 
 const DetailProduct = () => {
 	return (

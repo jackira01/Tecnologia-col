@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { Catalogo } from '@/components/Catalogo/Catalogo'
+import { Catalogo } from '@/components/Catalogo/Catalogo';
 
 const catalogoPage = () => {
-  return (
-    <div>
-      <Catalogo />
-    </div>
-  )
-}
+	return (
+		<div>
+			<Catalogo />
+		</div>
+	);
+};
 
-export default catalogoPage
+export default catalogoPage;

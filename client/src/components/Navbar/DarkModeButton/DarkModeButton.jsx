@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import useDarkMode from "@/hooks/useDarkMode";
-import { Button } from "flowbite-react";
-import { MdOutlineDarkMode } from "react-icons/md";
-import { GoSun } from "react-icons/go";
+import useDarkMode from '@/hooks/useDarkMode';
+import { Button } from 'flowbite-react';
+import { GoSun } from 'react-icons/go';
+import { MdOutlineDarkMode } from 'react-icons/md';
 
 const DarkModeButton = () => {
 	const [theme, toggleTheme] = useDarkMode();
 	return (
 		<>
-			{theme === "light" ? (
+			{theme === 'light' ? (
 				<Button className="bg-none" onClick={toggleTheme}>
 					<MdOutlineDarkMode size={35} />
 				</Button>

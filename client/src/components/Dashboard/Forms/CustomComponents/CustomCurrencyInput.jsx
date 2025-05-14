@@ -1,14 +1,14 @@
-import React from "react";
-import CurrencyInput from "react-currency-input-field";
+import React from 'react';
+import CurrencyInput from 'react-currency-input-field';
 
 export const CustomCurrencyInput = (props) => {
 	const commonConfig = {
 		defaultValue: 0,
 		decimalsLimit: 2,
-		decimalSeparator: ".",
-		groupSeparator: ",",
-		prefix: "$",
-		intlConfig: { locale: "en-US", currency: "USD" },
+		decimalSeparator: '.',
+		groupSeparator: ',',
+		prefix: '$',
+		intlConfig: { locale: 'en-US', currency: 'USD' },
 	};
 
 	return (
