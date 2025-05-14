@@ -1,5 +1,5 @@
-import { CustomCurrencyInput } from "./CustomCurrencyInput";
-import { Label, TextInput } from "flowbite-react";
+import { Label, TextInput } from 'flowbite-react';
+import { CustomCurrencyInput } from './CustomCurrencyInput';
 
 export const CurrencyField = ({
 	keyValue,

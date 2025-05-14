@@ -1,7 +1,5 @@
-const { default: ContactUs } = require("@/components/ContactUs/ContactUs");
+const { default: ContactUs } = require('@/components/ContactUs/ContactUs');
 
-const contactUsPage = () => (
-    <ContactUs/>
-)
+const contactUsPage = () => <ContactUs />;
 
-export default contactUsPage
+export default contactUsPage;

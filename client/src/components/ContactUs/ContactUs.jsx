@@ -1,4 +1,4 @@
-import { Button } from "flowbite-react";
+import { Button } from 'flowbite-react';
 
 const ContactUs = () => (
 	<section>
@@ -7,7 +7,8 @@ const ContactUs = () => (
 				Contactanos
 			</h2>
 			<p className="mb-8 lg:mb-16 font-light text-center sm:text-xl dark:text-mainDark-white">
-				No encuentras tu portatil ideal o quieres contactar con nosotros? Haznoslo saber!
+				No encuentras tu portatil ideal o quieres contactar con nosotros?
+				Haznoslo saber!
 			</p>
 			<form className="space-y-8">
 				<div>
