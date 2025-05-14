@@ -11,7 +11,7 @@ export const NavbarComponent = () => {
 		{
 			key: 1,
 			label: 'catalogo',
-			href: 'catalogo',
+			href: '',
 		},
 		{
 			key: 2,
@@ -35,7 +35,7 @@ export const NavbarComponent = () => {
 
 	return (
 		<Navbar className="bg-[#31363F] text-[#EEEEEE]" fluid rounded>
-			<Navbar.Brand as={Link} href="/catalogo">
+			<Navbar.Brand as={Link} href="/">
 				<GiLaptop className="mx-2" size={20} />
 				<span className="self-center whitespace-nowrap text-xl font-semibold">
 					Tecnologia COL
