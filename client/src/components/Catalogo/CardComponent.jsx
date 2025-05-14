@@ -47,7 +47,7 @@ export const CardComponent = ({ data }) => {
 				</div>
 
 				<Link
-					href={`/catalogo/${data.id}`}
+					href={`/${data.id}`}
 					className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 				>
 					Ver detalles
