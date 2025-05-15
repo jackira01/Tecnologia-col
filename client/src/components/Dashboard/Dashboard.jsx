@@ -57,23 +57,22 @@ const Dashboard = () => {
 							<IoAddCircleOutline size={20} className="mx-2" />
 							Crear Producto
 						</Button>
-						<Button>DEMO</Button>
 					</div>
 					<Table hoverable>
-						<Table.Head>
+						<Table.Head >
 							{headTitle.map((value) => (
-								<Table.HeadCell className="text-base" key={value.key}>
+								<Table.HeadCell className="text-base transition-colors duration-500" key={value.key}>
 									{value.label}
 								</Table.HeadCell>
 							))}
 						</Table.Head>
-						<Table.Body className="divide-y">
+						<Table.Body className="divide-y transition-colors duration-500">
 							{products?.map((product) => (
 								<Table.Row
 									key={product._id}
-									className="bg-red-200 text-base dark:border-gray-700 dark:bg-gray-800"
+									className="transition-colors duration-500 bg-mainLight-card text-base dark:border-gray-700 dark:bg-gray-800"
 								>
-									<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+									<Table.Cell className="transition-colors duration-500 whitespace-nowrap font-medium text-gray-900 dark:text-white">
 										{product.name}
 									</Table.Cell>
 									<Table.Cell>{product.sale_status}</Table.Cell>
@@ -83,10 +82,9 @@ const Dashboard = () => {
 									<Table.Cell>{parseDate(product.createdOn)}</Table.Cell>
 									<Table.Cell>
 										<Button
-											className="bg-inherit dark:bg-inherit"
 											onClick={(e) => handleClickEdit(product)}
 										>
-											<MdOutlineEdit size={20} />
+											<MdOutlineEdit className='text-mainDark-white' size={20} />
 										</Button>
 									</Table.Cell>
 								</Table.Row>

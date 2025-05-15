@@ -11,11 +11,6 @@ export const getProducts = async (page) => {
 		);
 		return response.data;
 	} catch (error) {
-		if (error.response) {
-			console.log(error.response.data.message);
-		} else {
-			console.log(error);
-		}
 		toast.error('Ups! Algo paso...');
 	}
 };
@@ -26,11 +21,6 @@ export const createProducts = async (data) => {
 		toast.success(response.data.message);
 		return response.data.product;
 	} catch (error) {
-		if (error.response) {
-			console.log(error.response.data.message);
-		} else {
-			console.log(error);
-		}
 		toast.error('Ups! Algo paso...');
 	}
 };
@@ -44,11 +34,6 @@ export const updateProducts = async (data) => {
 		toast.success(response.data.message);
 		return response.data.product;
 	} catch (error) {
-		if (error.response) {
-			console.log(error.response.data.message);
-		} else {
-			console.log(error);
-		}
 		toast.error('Ups! Algo paso...');
 	}
 };

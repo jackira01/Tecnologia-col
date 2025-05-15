@@ -1,3 +1,5 @@
-const sobreNosotrosPage = () => <p>sobre nosotros</p>;
+const { default: AboutUs } = require('@/components/AboutUs/AboutUs');
 
-export default sobreNosotrosPage;
+const AboutUsPage = () => <AboutUs />;
+
+export default AboutUsPage;

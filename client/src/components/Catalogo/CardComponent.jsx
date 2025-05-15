@@ -11,12 +11,10 @@ export const CardComponent = ({ data }) => {
 			<span className="text-sm text-gray-700 dark:text-gray-300">{text}</span>
 		</div>
 	);
-
-	console.log(data);
-
 	return (
 		<Card
-			className="h-full w-full min-w-[250px] max-w-[300px] border-none bg-white shadow-md dark:bg-gray-800"
+
+			className="transition-colors duration-500 h-full w-full min-w-[250px] max-w-[300px] border-none text-mainLight-text dark:bg-mainDark-card dark:text-mainDark-text shadow-md"
 			imgSrc={data.image}
 			imgAlt={data.name}
 		>
@@ -48,7 +46,7 @@ export const CardComponent = ({ data }) => {
 
 				<Link
 					href={`/${data.id}`}
-					className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+					className="px-3 py-2 text-center text-sm font-medium mt-4 inline-flex items-center justify-center rounded-lg bg-mainLight-primary dark:bg-mainLight-primary text-white dark:text-mainDark-text hover:bg-mainLight-primaryHover dark:hover:bg-mainLight-primary focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
 				>
 					Ver detalles
 				</Link>
