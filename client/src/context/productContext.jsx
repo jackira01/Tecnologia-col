@@ -8,6 +8,7 @@ export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
 	const [currentProduct, setCurrentProduct] = useState(defaultValuesForm);
+	const [currentPage, setCurrentPage] = useState(1);
 	const [isEdit, setIsEdit] = useState(false);
 	const [products, setProducts] = useState([]);
 	const [loaderProducts, setLoaderProducts] = useState(true);
@@ -50,6 +51,8 @@ export const ProductProvider = ({ children }) => {
 				setIsEdit,
 				error,
 				setError,
+				currentPage,
+				setCurrentPage,
 			}}
 		>
 			{children}

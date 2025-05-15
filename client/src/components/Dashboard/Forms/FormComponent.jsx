@@ -37,7 +37,8 @@ export const FormComponent = () => {
 			);
 			return response.data.secure_url;
 		} catch (error) {
-			console.log(error);
+			toast.error('Error al subir la imagen');
+			return null;
 		}
 	};
 

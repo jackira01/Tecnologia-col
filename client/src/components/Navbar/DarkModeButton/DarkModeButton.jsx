@@ -9,15 +9,10 @@ const DarkModeButton = () => {
 	const [theme, toggleTheme] = useDarkMode();
 	return (
 		<>
-			{theme === 'light' ? (
-				<Button className="bg-none" onClick={toggleTheme}>
-					<MdOutlineDarkMode size={35} />
-				</Button>
-			) : (
-				<Button className="bg-none" onClick={toggleTheme}>
-					<GoSun size={35} />
-				</Button>
-			)}
+			<button type='button' className="m-1 p-1 rounded-sm bg-mainLight-card dark:bg-mainDark-card text-mainLight-text dark:text-mainDark-white " onClick={toggleTheme}
+			>
+				{theme === 'light' ? <MdOutlineDarkMode size={35} /> : <GoSun size={35} />}
+			</button>
 		</>
 	);
 };

@@ -34,7 +34,7 @@ export const NavbarComponent = () => {
 	];
 
 	return (
-		<Navbar className="bg-[#31363F] text-[#EEEEEE]" fluid rounded>
+		<Navbar className="transition-colors duration-500 bg-mainLight-card" fluid rounded>
 			<Navbar.Brand as={Link} href="/">
 				<GiLaptop className="mx-2" size={20} />
 				<span className="self-center whitespace-nowrap text-xl font-semibold">
@@ -45,7 +45,7 @@ export const NavbarComponent = () => {
 			<Navbar.Collapse>
 				{menuItems.map((item) => (
 					<Link href={`/${item.href}`} key={item.key}>
-						<p className="text-[#EEEEEE] text-lg">{item.label}</p>
+						<p className="text-lg">{item.label}</p>
 					</Link>
 				))}
 			</Navbar.Collapse>

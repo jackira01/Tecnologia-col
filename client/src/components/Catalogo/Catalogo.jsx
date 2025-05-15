@@ -43,7 +43,7 @@ export const Catalogo = () => {
 		<>
 			<SideBarComponent className="bg-[#31363F]" />
 
-			<div className="flex flex-col justify-center items-center w-full min-h-screen bg-gray-900">
+			<div className="flex flex-col justify-center items-center w-full min-h-screen">
 				{loaderProducts ? (
 					<Spinner />
 				) : error ? (

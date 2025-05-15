@@ -6,14 +6,13 @@ import { Pagination, Spinner } from 'flowbite-react';
 import { useContext, useEffect, useState } from 'react';
 
 export const ProductPagination = () => {
-	const { setProducts, totalPages, loaderProducts, setLoaderProducts } =
+	const { setProducts, totalPages, loaderProducts, setLoaderProducts, currentPage, setCurrentPage } =
 		useContext(ProductContext);
-	const [currentPage, setCurrentPage] = useState(1);
 
 	const onPageChange = async (page) => {
 		setLoaderProducts(true);
 		const response = await getProducts(page);
-		await setProducts(response.docs);
+		setProducts(response.docs);
 		setCurrentPage(response.page);
 		setLoaderProducts(false);
 	};
@@ -24,7 +23,7 @@ export const ProductPagination = () => {
 				<Spinner size="md" />
 			) : (
 				<div className="flex flex-col justify-end">
-					<p className="text-white ml-10">
+					<p className="text-mainLight-text dark:text-mainDark-white ml-10">
 						pagina <strong>{currentPage}</strong> de{' '}
 						<strong>{totalPages}</strong>{' '}
 					</p>
