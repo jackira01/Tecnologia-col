@@ -9,8 +9,10 @@ import { RiRam2Line } from 'react-icons/ri';
 export const CardComponent = ({ data }) => {
   const { setCurrentProduct } = useContext(ProductContext);
 
-  const handleClickDetails = () => {
-    setCurrentProduct(data);
+  const handleClickDetails = async () => {
+    console.log(data);
+
+    await setCurrentProduct(data);
   };
 
   const SpecItem = ({ icon, text }) => (
@@ -22,7 +24,7 @@ export const CardComponent = ({ data }) => {
   return (
     <Card
       className="transition-colors duration-500 h-full w-full min-w-[250px] max-w-[300px] border-none text-mainLight-text dark:bg-mainDark-card dark:text-mainDark-text shadow-md"
-      imgSrc={data.image}
+      imgSrc={data.image_URL[0]}
       imgAlt={data.name}
     >
       <div className="flex h-full flex-col justify-between p-4">
