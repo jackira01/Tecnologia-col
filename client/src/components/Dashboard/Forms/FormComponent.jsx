@@ -29,20 +29,19 @@ export const FormComponent = () => {
 
 	const [ArrayImages, setrrayImages] = useState([]);
 
-
 	/* 	const compressImage = async (file) => {
-			const options = {
-				maxSizeMB: 0.3, // 300 KB
-				maxWidthOrHeight: 1024,
-				useWebWorker: true,
-			};
-			try {
-				return await imageCompression(file, options);
-			} catch (error) {
-				console.error('Error al comprimir imagen:', error);
-				return file;
-			}
-		}; */
+			  const options = {
+				  maxSizeMB: 0.3, // 300 KB
+				  maxWidthOrHeight: 1024,
+				  useWebWorker: true,
+			  };
+			  try {
+				  return await imageCompression(file, options);
+			  } catch (error) {
+				  console.error('Error al comprimir imagen:', error);
+				  return file;
+			  }
+		  }; */
 
 	const uploadImage = async (image) => {
 		/* const compressedImage = await compressImage(image); */
@@ -54,29 +53,29 @@ export const FormComponent = () => {
 		return formData;
 
 		/* try {
-			const response = await axios.post(
-				'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
-				formData
-			);
-			return response.data.secure_url;
-		} catch (error) {
-			toast.error('Error al subir la imagen');
-			return null;
-		} */
+				const response = await axios.post(
+					'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
+					formData
+				);
+				return response.data.secure_url;
+			} catch (error) {
+				toast.error('Error al subir la imagen');
+				return null;
+			} */
 	};
 
 	const uploadMultipleImages = async (filesArray) => {
 		const uploadedUrls = [];
-		console.log('entre aqui')
+		console.log('llegue 2')
 		for (const file of filesArray) {
 			const formData = new FormData();
-			formData.append("file", file);
-			formData.append("upload_preset", "tecnologia_col");
+			formData.append('file', file);
+			formData.append('upload_preset', 'tecnologia_col');
 
 			try {
 				const response = await axios.post(
-					"https://api.cloudinary.com/v1_1/di6qf8c06/image/upload",
-					formData
+					'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
+					formData,
 				);
 				uploadedUrls.push(response.data.secure_url);
 			} catch (error) {
@@ -93,30 +92,29 @@ export const FormComponent = () => {
 		setrrayImages(ArrayImages.concat(files)); // colocar los nuevos archivos (objetos) en el array
 	};
 
-
 	const onSubmit = async (data) => {
 		setIsSubmiting(true);
 		setOpenModal(false);
-
+		console.log('llegue 1')
 		imageUrls = await uploadMultipleImages(ArrayImages);
 
 		console.log('imageUrls', imageUrls);
 
 		/* const payload = parseData({
-			...data,
-			image_URL: imageUrls, // ahora es un array
-		});
-
-		const newProduct = isEdit
-			? await updateProducts({ ...payload, _id: data._id })
-			: await createProducts(payload);
-
-		setProducts((prev) =>
-			isEdit ? [...prev] : { ...prev, newProduct }
-		);
-		setCurrentProduct(defaultValuesForm);
-		setIsSubmiting(false);*/
-		return
+				...data,
+				image_URL: imageUrls, // ahora es un array
+			});
+	
+			const newProduct = isEdit
+				? await updateProducts({ ...payload, _id: data._id })
+				: await createProducts(payload);
+	
+			setProducts((prev) =>
+				isEdit ? [...prev] : { ...prev, newProduct }
+			);
+			setCurrentProduct(defaultValuesForm);
+			setIsSubmiting(false);*/
+		return;
 	};
 
 	return (
@@ -170,10 +168,10 @@ export const FormComponent = () => {
 							onChange={(e) => {
 								handleFileChange(e);
 								/* const files = [...values.image_URL, ...e.target.files].slice(0, 5);
-								setFieldValue('image_URL', files);
-
-								const previews = files.map((file) => URL.createObjectURL(file));
-								setPreviewImages(previews); */
+												setFieldValue('image_URL', files);
+				
+												const previews = files.map((file) => URL.createObjectURL(file));
+												setPreviewImages(previews); */
 							}}
 						/>
 						{/* <div className="flex gap-4 flex-wrap mt-4 col-span-2">
@@ -199,8 +197,6 @@ export const FormComponent = () => {
 							</div>
 						</div>
 						<div />
-
-
 					</div>
 
 					<div className="col-span-2 text-lg text-white font-bold font-sans">
@@ -426,4 +422,4 @@ export const FormComponent = () => {
 			)}
 		</Formik>
 	);
-}; 
+};
