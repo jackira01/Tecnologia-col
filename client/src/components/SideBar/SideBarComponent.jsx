@@ -3,9 +3,9 @@
 import { Sidebar } from 'flowbite-react';
 
 const SideBarComponent = () => {
-	return (
-		<>
-			{/* <Sidebar className="md:hidden" aria-label="Default sidebar example">
+  return (
+    <>
+      {/* <Sidebar className="md:hidden" aria-label="Default sidebar example">
 			<Sidebar.Items className="">
 				<Sidebar.ItemGroup>
 					<Sidebar.Item href="#">Dashboard</Sidebar.Item>
@@ -22,8 +22,8 @@ const SideBarComponent = () => {
 				</Sidebar.ItemGroup>
 			</Sidebar.Items>
 		</Sidebar> */}
-		</>
-	);
+    </>
+  );
 };
 
 export default SideBarComponent;

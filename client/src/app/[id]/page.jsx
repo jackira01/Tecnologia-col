@@ -1,9 +1,9 @@
 const {
-	default: DetailProduct,
+  default: DetailProduct,
 } = require('@/components/DetailProduct/DetailProduct');
 
 const detailProductPage = () => {
-	return <DetailProduct />;
+  return <DetailProduct />;
 };
 
 export default detailProductPage;
