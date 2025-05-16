@@ -4,116 +4,136 @@ import { useContext, useState } from 'react';
 
 import { CreateProductSchema } from '@/Helpers/SchemasValidation';
 import { ProductContext } from '@/context/productContext';
-import {
-	createProducts,
-	getProducts,
-	updateProducts,
-} from '@/services/products';
-import { defaultValuesForm, parseData } from '@/utils';
+
 import axios from 'axios';
 import { Button, FileInput, Label, Select, Spinner } from 'flowbite-react';
 import { Form, Formik } from 'formik';
 import { CurrencyField, TextInputField } from './CustomComponents/CustomInputs';
+import toast from 'react-hot-toast';
+import imageCompression from 'browser-image-compression';
+import { defaultValuesForm, parseData } from '@/utils';
+import { createProducts, updateProducts } from '@/services/products';
+
+
 
 export const FormComponent = () => {
 	const {
 		currentProduct,
-		setCurrentProduct,
 		isEdit,
 		setProducts,
 		setOpenModal,
+		setCurrentProduct
 	} = useContext(ProductContext);
+
 	const [isSubmiting, setIsSubmiting] = useState(false);
-
-	const [previewImages, setPreviewImages] = useState([]);
-
 	const [ArrayImages, setrrayImages] = useState([]);
+	const [currentArrayImages, setCurrentArrayImages] = useState([]);
 
-	/* 	const compressImage = async (file) => {
-			  const options = {
-				  maxSizeMB: 0.3, // 300 KB
-				  maxWidthOrHeight: 1024,
-				  useWebWorker: true,
-			  };
-			  try {
-				  return await imageCompression(file, options);
-			  } catch (error) {
-				  console.error('Error al comprimir imagen:', error);
-				  return file;
-			  }
-		  }; */
-
-	const uploadImage = async (image) => {
-		/* const compressedImage = await compressImage(image); */
-		const formData = new FormData();
-		// formData.append('file', compressedImage);
-		formData.append('file', image);
-		formData.append('upload_preset', 'tecnologia col');
-		console.log('formData', formData);
-		return formData;
-
-		/* try {
-				const response = await axios.post(
-					'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
-					formData
-				);
-				return response.data.secure_url;
-			} catch (error) {
-				toast.error('Error al subir la imagen');
-				return null;
-			} */
+	const compressImage = async (file) => {
+		const options = {
+			maxSizeMB: 0.3, // máximo 300KB
+			maxWidthOrHeight: 1024, // redimensiona si es más grande
+			useWebWorker: true,
+		};
+		try {
+			return await imageCompression(file, options);
+		} catch (error) {
+			console.error('Error al comprimir imagen:', error);
+			return file; // si falla, sigue con el original
+		}
 	};
 
 	const uploadMultipleImages = async (filesArray) => {
 		const uploadedUrls = [];
-		console.log('llegue 2')
-		for (const file of filesArray) {
-			const formData = new FormData();
-			formData.append('file', file);
-			formData.append('upload_preset', 'tecnologia_col');
 
+		for (const file of filesArray) {
 			try {
+				const compressed = await compressImage(file);
+				const formData = new FormData();
+				formData.append('file', compressed);
+				formData.append('upload_preset', 'tecnologia_col');
+
 				const response = await axios.post(
-					'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
-					formData,
+					'https://api.cloudinary.com/v1_1/dikkcrred/image/upload',
+					formData
 				);
 				uploadedUrls.push(response.data.secure_url);
 			} catch (error) {
 				console.error(`Error al subir ${file.name}:`, error);
-				uploadedUrls.push(null); // Opcional: manejar errores individualmente
+				uploadedUrls.push(null); // O maneja según tu lógica
 			}
 		}
 
-		return uploadedUrls; // Ej: ["url1.jpg", "url2.jpg", ...]
+		return uploadedUrls;
 	};
 
+
 	const handleFileChange = (e) => {
-		const files = Array.from(e.target.files); // Convertir FileList a array
-		setrrayImages(ArrayImages.concat(files)); // colocar los nuevos archivos (objetos) en el array
+		const selectedFiles = Array.from(e.target.files);
+
+		// Evita duplicados
+		const newFiles = selectedFiles.filter(
+			(file) =>
+				!ArrayImages.some(
+					(existing) =>
+						existing.name === file.name &&
+						existing.lastModified === file.lastModified
+				)
+		);
+
+		if (newFiles.length < selectedFiles.length) {
+			toast.error('Algunas imágenes ya fueron seleccionadas y se omitieron');
+		}
+
+		const totalFiles = ArrayImages.length + newFiles.length;
+
+		if (totalFiles > 5) {
+			toast.error('Solo puedes subir un máximo de 5 imágenes');
+			return;
+		}
+
+		setrrayImages((prev) => [...prev, ...newFiles]);
 	};
+
+
 
 	const onSubmit = async (data) => {
 		setIsSubmiting(true);
 		setOpenModal(false);
-		console.log('llegue 1')
-		imageUrls = await uploadMultipleImages(ArrayImages);
+		try {
+			toast.loading('Comprimiendo y subiendo imágenes...');
+			const imageUrls = await uploadMultipleImages(ArrayImages);
 
-		console.log('imageUrls', imageUrls);
+			toast.dismiss();
 
-		/* const payload = parseData({
+			toast.loading('Creando producto...');
+
+			const payload = parseData({
 				...data,
 				image_URL: imageUrls, // ahora es un array
 			});
-	
+
+			console.log('payload', payload);
+
 			const newProduct = isEdit
 				? await updateProducts({ ...payload, _id: data._id })
 				: await createProducts(payload);
-	
+
 			setProducts((prev) =>
 				isEdit ? [...prev] : { ...prev, newProduct }
 			);
 			setCurrentProduct(defaultValuesForm);
-			setIsSubmiting(false);*/
+			toast.dismiss();
+		} catch (error) {
+			console.error('Error al subir las imágenes:', error);
+			toast.error('Error al subir las imágenes');
+			setIsSubmiting(false);
+			return;
+		}
+
+		setIsSubmiting(false);
+		setOpenModal(false);
+		toast.success('Producto creado con exito');
 		return;
 	};
 
@@ -167,23 +187,8 @@ export const FormComponent = () => {
 							multiple
 							onChange={(e) => {
 								handleFileChange(e);
-								/* const files = [...values.image_URL, ...e.target.files].slice(0, 5);
-												setFieldValue('image_URL', files);
-				
-												const previews = files.map((file) => URL.createObjectURL(file));
-												setPreviewImages(previews); */
 							}}
 						/>
-						{/* <div className="flex gap-4 flex-wrap mt-4 col-span-2">
-							{previewImages.map((src, idx) => (
-								<img
-									key={src}
-									src={src}
-									alt={`preview-${idx}`}
-									className="w-24 h-24 object-cover rounded shadow"
-								/>
-							))}
-						</div> */}
 						<div className="mt-4 overflow-x-auto scroll-smooth">
 							<div className="flex gap-2 w-max">
 								{ArrayImages.map((file, index) => (

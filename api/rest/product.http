@@ -16,7 +16,7 @@ content-type: application/json
             "buy": "100.000",
             "sale": "120.000"
         },
-    "image": "https://i.blogs.es/0d4873/image-removebg-preview-16-/original.png",
+    "image_URL": ["https://i.blogs.es/0d4873/image-removebg-preview-16-/original.png"],
     "specification": {
         "specification_URL": "URL",
         "product_status": "nuevo",

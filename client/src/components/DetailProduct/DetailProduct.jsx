@@ -12,7 +12,7 @@ const DetailProduct = () => {
 		<section className="py-8 md:py-16 antialiased">
 			<div className="max-w-screen-xl px-4 mx-auto 2xl:px-0">
 				<div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-					<CarouselComponent />
+					<CarouselComponent images={currentProduct.image_URL} />
 
 					<div className="mt-6 sm:mt-8 lg:mt-0">
 						<div>
@@ -32,46 +32,43 @@ const DetailProduct = () => {
 							<ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300 text-sm">
 								<li>
 									<span className="font-semibold">Sistema Operativo:</span>{' '}
-									{currentProduct?.so}
+									{currentProduct?.specification.so}
 								</li>
 								<li>
 									<span className="font-semibold">Marca:</span>{' '}
-									{currentProduct?.brand}
+									{currentProduct?.specification.brand}
 								</li>
 								<li>
 									<span className="font-semibold">Pantalla:</span>{' '}
-									{currentProduct?.screen_size}"
+									{currentProduct?.specification.screen_size}"
 								</li>
 								<li>
 									<span className="font-semibold">Batería:</span>{' '}
-									{currentProduct?.battery ? 'Sí' : 'No'}
+									{currentProduct?.specification.battery ? 'Sí' : 'No'}
 								</li>
 								<li>
 									<span className="font-semibold">Cargador:</span>{' '}
-									{currentProduct?.charger ? 'Sí' : 'No'}
+									{currentProduct?.specification.charger ? 'Sí' : 'No'}
 								</li>
 								<li>
 									<span className="font-semibold">RAM:</span>{' '}
-									{currentProduct?.ram_size}{' '}
-									{currentProduct?.ram.ram_type}
+									{currentProduct?.specification.ram.ram_size}{' '}
+									{currentProduct?.specification.ram.ram_type}
 								</li>
 								<li>
 									<span className="font-semibold">Almacenamiento:</span>{' '}
-									{currentProduct?.storage_size}{' '}
-									{currentProduct?.storage_type}
+									{currentProduct?.specification.storage.size}{' '}
+									{currentProduct?.specification.storage.storage_type}
 								</li>
 								<li>
 									<span className="font-semibold">Procesador:</span>{' '}
-									{currentProduct?.processor_brand}{' '}
-									{currentProduct?.processor_model}
+									{currentProduct?.specification.processor.brand}{' '}
+									{currentProduct?.specification.processor.model}
 								</li>
-								<li>
-									<span className="font-semibold">Estado del producto:</span>{' '}
-									{currentProduct?.product_status}
-								</li>
+
 								<li>
 									<a
-										href={currentProduct?.specificationURL}
+										href={currentProduct?.specification.specification_URL}
 										className="text-blue-500 hover:underline"
 										target="_blank"
 										rel="noopener noreferrer"
@@ -81,7 +78,7 @@ const DetailProduct = () => {
 								</li>
 								<li className="col-span-2">
 									<span className="font-semibold">Descripción general:</span>{' '}
-									{currentProduct?.general_description}
+									{currentProduct?.specification.general_description}
 								</li>
 							</ul>
 						</div>
