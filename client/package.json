@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@formkit/tempo": "^0.1.2",
 		"axios": "^1.7.2",
+		"browser-image-compression": "^2.0.2",
 		"flowbite-react": "^0.10.1",
 		"formik": "^2.4.6",
 		"next": "14.2.5",

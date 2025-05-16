@@ -1,4 +1,3 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ProductProvider } from "@/context/productContext";
 import { ThemeModeScript } from "flowbite-react";
@@ -6,8 +5,8 @@ import { Toaster } from "react-hot-toast";
 import Overlay from "./Overlay";
 
 export const metadata = {
-	title: "Colombia portatiles",
-	description: "Colombia portatiles",
+	title: "Tecnologia col",
+	description: "Tecnologia col",
 };
 
 export default function RootLayout({ children }) {
