@@ -1,10 +1,19 @@
+import { ProductContext } from '@/context/productContext';
 import { Card } from 'flowbite-react';
 import Link from 'next/link';
+import { useContext } from 'react';
 import { BsDeviceHdd } from 'react-icons/bs';
 import { HiMiniCpuChip } from 'react-icons/hi2';
 import { RiRam2Line } from 'react-icons/ri';
 
 export const CardComponent = ({ data }) => {
+
+	const { setCurrentProduct } = useContext(ProductContext);
+
+	const handleClickDetails = () => {
+		setCurrentProduct(data);
+	};
+
 	const SpecItem = ({ icon, text }) => (
 		<div className="flex items-center">
 			<span className="mr-2 text-gray-600 dark:text-gray-400">{icon}</span>
@@ -46,6 +55,9 @@ export const CardComponent = ({ data }) => {
 
 				<Link
 					href={`/${data.id}`}
+					onClick={() => {
+						handleClickDetails();
+					}}
 					className="px-3 py-2 text-center text-sm font-medium mt-4 inline-flex items-center justify-center rounded-lg bg-mainLight-primary dark:bg-mainLight-primary text-white dark:text-mainDark-text hover:bg-mainLight-primaryHover dark:hover:bg-mainLight-primary focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
 				>
 					Ver detalles

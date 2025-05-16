@@ -25,55 +25,100 @@ export const FormComponent = () => {
 	} = useContext(ProductContext);
 	const [isSubmiting, setIsSubmiting] = useState(false);
 
+	const [previewImages, setPreviewImages] = useState([]);
+
+	const [ArrayImages, setrrayImages] = useState([]);
+
+
+	/* 	const compressImage = async (file) => {
+			const options = {
+				maxSizeMB: 0.3, // 300 KB
+				maxWidthOrHeight: 1024,
+				useWebWorker: true,
+			};
+			try {
+				return await imageCompression(file, options);
+			} catch (error) {
+				console.error('Error al comprimir imagen:', error);
+				return file;
+			}
+		}; */
+
 	const uploadImage = async (image) => {
+		/* const compressedImage = await compressImage(image); */
 		const formData = new FormData();
+		// formData.append('file', compressedImage);
 		formData.append('file', image);
 		formData.append('upload_preset', 'tecnologia col');
+		console.log('formData', formData);
+		return formData;
 
-		try {
+		/* try {
 			const response = await axios.post(
 				'https://api.cloudinary.com/v1_1/di6qf8c06/image/upload',
-				formData,
+				formData
 			);
 			return response.data.secure_url;
 		} catch (error) {
 			toast.error('Error al subir la imagen');
 			return null;
-		}
+		} */
 	};
+
+	const uploadMultipleImages = async (filesArray) => {
+		const uploadedUrls = [];
+		console.log('entre aqui')
+		for (const file of filesArray) {
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("upload_preset", "tecnologia_col");
+
+			try {
+				const response = await axios.post(
+					"https://api.cloudinary.com/v1_1/di6qf8c06/image/upload",
+					formData
+				);
+				uploadedUrls.push(response.data.secure_url);
+			} catch (error) {
+				console.error(`Error al subir ${file.name}:`, error);
+				uploadedUrls.push(null); // Opcional: manejar errores individualmente
+			}
+		}
+
+		return uploadedUrls; // Ej: ["url1.jpg", "url2.jpg", ...]
+	};
+
+	const handleFileChange = (e) => {
+		const files = Array.from(e.target.files); // Convertir FileList a array
+		setrrayImages(ArrayImages.concat(files)); // colocar los nuevos archivos (objetos) en el array
+	};
+
 
 	const onSubmit = async (data) => {
 		setIsSubmiting(true);
-		if (isEdit) {
-			setOpenModal(false);
-			const updataImage =
-				typeof data.image_URL === 'string'
-					? data.image_URL
-					: await uploadImage(data.image_URL);
+		setOpenModal(false);
 
-			const newObj = parseData({
-				...data,
-				image_URL: updataImage,
-			});
-			const updateData = await updateProducts({ ...newObj, _id: data._id });
-			setProducts((prev) => [...prev, updateData]);
-			setCurrentProduct(defaultValuesForm);
-			setIsSubmiting(false);
-		} else {
-			setOpenModal(false);
-			const updataImage = await uploadImage(data.image_URL);
-			const newProduct = await createProducts(
-				parseData({ ...data, image_URL: updataImage }),
-			);
-			setProducts((prev) => ({
-				...prev,
-				newProduct,
-			}));
-			setCurrentProduct(defaultValuesForm);
-			setIsSubmiting(false);
-			setOpenModal(false);
-		}
+		imageUrls = await uploadMultipleImages(ArrayImages);
+
+		console.log('imageUrls', imageUrls);
+
+		/* const payload = parseData({
+			...data,
+			image_URL: imageUrls, // ahora es un array
+		});
+
+		const newProduct = isEdit
+			? await updateProducts({ ...payload, _id: data._id })
+			: await createProducts(payload);
+
+		setProducts((prev) =>
+			isEdit ? [...prev] : { ...prev, newProduct }
+		);
+		setCurrentProduct(defaultValuesForm);
+		setIsSubmiting(false);*/
+		return
 	};
+
 	return (
 		<Formik
 			initialValues={currentProduct}
@@ -118,17 +163,44 @@ export const FormComponent = () => {
 							value="Subir Imagen"
 							className="text-base"
 						/>
+
 						<FileInput
 							id="image_URL"
-							helperText={
-								<span className="font-medium text-yellow-300">
-									{errors.image_URL && touched.image_URL
-										? errors.image_URL
-										: ''}
-								</span>
-							}
-							onChange={(e) => setFieldValue('image_URL', e.target.files[0])}
+							multiple
+							onChange={(e) => {
+								handleFileChange(e);
+								/* const files = [...values.image_URL, ...e.target.files].slice(0, 5);
+								setFieldValue('image_URL', files);
+
+								const previews = files.map((file) => URL.createObjectURL(file));
+								setPreviewImages(previews); */
+							}}
 						/>
+						{/* <div className="flex gap-4 flex-wrap mt-4 col-span-2">
+							{previewImages.map((src, idx) => (
+								<img
+									key={src}
+									src={src}
+									alt={`preview-${idx}`}
+									className="w-24 h-24 object-cover rounded shadow"
+								/>
+							))}
+						</div> */}
+						<div className="mt-4 overflow-x-auto scroll-smooth">
+							<div className="flex gap-2 w-max">
+								{ArrayImages.map((file, index) => (
+									<img
+										key={`${file.name}-${file.lastModified}-${index}`}
+										src={URL.createObjectURL(file)}
+										alt={`preview-${file.name}`}
+										className="w-24 h-24 object-cover rounded"
+									/>
+								))}
+							</div>
+						</div>
+						<div />
+
+
 					</div>
 
 					<div className="col-span-2 text-lg text-white font-bold font-sans">
@@ -354,4 +426,4 @@ export const FormComponent = () => {
 			)}
 		</Formik>
 	);
-};
+}; 
