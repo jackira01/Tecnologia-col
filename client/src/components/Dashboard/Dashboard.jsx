@@ -20,8 +20,8 @@ const Dashboard = () => {
     setTotalPages,
     setCurrentProduct,
     setIsEdit,
+    openModal, setOpenModal
   } = useContext(ProductContext);
-  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -48,16 +48,17 @@ const Dashboard = () => {
 
   return (
     <div className="overflow-x-auto">
+      <div className="flex gap-2">
+        <Button onClick={setOpenModal}>
+          <IoAddCircleOutline size={20} className="mx-2" />
+          Crear Producto
+        </Button>
+      </div>
       {loaderProducts ? (
         <Spinner />
       ) : products.length ? (
         <>
-          <div className="flex gap-2">
-            <Button onClick={setOpenModal}>
-              <IoAddCircleOutline size={20} className="mx-2" />
-              Crear Producto
-            </Button>
-          </div>
+
           <Table hoverable>
             <Table.Head>
               {headTitle.map((value) => (

@@ -1,5 +1,5 @@
 import { ProductContext } from '@/context/productContext';
-import { Card } from 'flowbite-react';
+import { Button, Card } from 'flowbite-react';
 import Link from 'next/link';
 import { useContext } from 'react';
 import { BsDeviceHdd } from 'react-icons/bs';
@@ -10,8 +10,6 @@ export const CardComponent = ({ data }) => {
   const { setCurrentProduct } = useContext(ProductContext);
 
   const handleClickDetails = async () => {
-    console.log(data);
-
     await setCurrentProduct(data);
   };
 
@@ -27,8 +25,14 @@ export const CardComponent = ({ data }) => {
       imgSrc={data.image_URL[0]}
       imgAlt={data.name}
     >
-      <div className="flex h-full flex-col justify-between p-4">
+      <div className="flex h-full flex-col justify-between">
         <div>
+
+          {data.sale_status === 'vendido' ? (
+            <span className="text-red-500 font-bold">Vendido</span>
+          ) : (
+            <span className="text-green-500 font-bold">Disponible</span>
+          )}
           <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white ">
             {data.name}
           </h5>
@@ -54,7 +58,7 @@ export const CardComponent = ({ data }) => {
         </div>
 
         <Link
-          href={`/${data.id}`}
+          href={`/${data._id}`}
           onClick={() => {
             handleClickDetails();
           }}

@@ -16,8 +16,17 @@ const DetailProduct = () => {
 
 					<div className="mt-6 sm:mt-8 lg:mt-0">
 						<div>
+
+							{
+								currentProduct?.sale_status === 'vendido' ? (
+									<span className="text-red-500 font-bold">Vendido</span>
+								) : (
+									<span className="text-green-500 font-bold">Disponible</span>)
+							}
+
+
 							<span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-								{currentProduct?.sale_status}
+
 							</span>
 						</div>
 						<h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
