@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { CreateProductSchema } from '@/Helpers/SchemasValidation';
 import { ProductContext } from '@/context/productContext';
@@ -17,17 +17,26 @@ import { createProducts, updateProducts } from '@/services/products';
 
 
 export const FormComponent = () => {
+
+	// Context
 	const {
 		currentProduct,
 		isEdit,
 		setProducts,
+		products,
 		setOpenModal,
 		setCurrentProduct
 	} = useContext(ProductContext);
 
 	const [isSubmiting, setIsSubmiting] = useState(false);
 	const [ArrayImages, setrrayImages] = useState([]);
-	const [currentArrayImages, setCurrentArrayImages] = useState([]);
+
+	// Este efecto se ejecutará cada vez que "products" cambie
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		console.log("El estado ha cambiado:");
+		// Aquí puedes ejecutar cualquier lógica adicional
+	}, [products]);
 
 	const compressImage = async (file) => {
 		const options = {
@@ -99,7 +108,6 @@ export const FormComponent = () => {
 
 	const onSubmit = async (data) => {
 		setIsSubmiting(true);
-		setOpenModal(false);
 		try {
 			toast.loading('Comprimiendo y subiendo imágenes...');
 			const imageUrls = await uploadMultipleImages(ArrayImages);
@@ -113,18 +121,21 @@ export const FormComponent = () => {
 				image_URL: imageUrls, // ahora es un array
 			});
 
-			console.log('payload', payload);
-
 			const newProduct = isEdit
 				? await updateProducts({ ...payload, _id: data._id })
 				: await createProducts(payload);
 
-			setProducts((prev) =>
-				isEdit ? [...prev] : { ...prev, newProduct }
-			);
+			if (isEdit) {
+				setProducts((prev) =>
+					prev.map((p) => (p._id === newProduct._id ? newProduct : p))
+				);
+			} else {
+				setProducts((prev) => [...prev, newProduct]);
+			}
 			setCurrentProduct(defaultValuesForm);
 			toast.dismiss();
 		} catch (error) {
+			setrrayImages([]);
 			console.error('Error al subir las imágenes:', error);
 			toast.error('Error al subir las imágenes');
 			setIsSubmiting(false);
