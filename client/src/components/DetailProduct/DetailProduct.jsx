@@ -2,11 +2,33 @@
 
 import { ProductContext } from '@/context/productContext';
 import { Button } from 'flowbite-react';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import CarouselComponent from './carousel/CarouselComponent';
+import { useRouter } from 'next/navigation';
+
 
 const DetailProduct = () => {
 	const { currentProduct } = useContext(ProductContext);
+
+	const router = useRouter();
+
+	useEffect(() => {
+		// Redirige a home después de 3 segundos (opcional)
+		const timeout = setTimeout(() => {
+			router.push('/');
+		}, 3000); // 3000 ms = 3 seconds
+
+		return () => clearTimeout(timeout);
+	}, [router]);
+
+
+	useEffect(() => {
+		if (!currentProduct.specification) {
+			router.push('/'); // redirección al home si no hay producto
+		}
+	}, [currentProduct, router]);
+
+	if (!currentProduct.specification) return null; // para evitar que se renderice contenido basura
 
 	return (
 		<section className="py-8 md:py-16 antialiased">

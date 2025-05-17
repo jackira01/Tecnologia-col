@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { default: _ } = require("mongoose-paginate-v2");
 const mongoosePaginate = require("mongoose-paginate-v2");
 
 const { model, Schema } = mongoose;
@@ -24,10 +25,20 @@ const LaptopProductSchema = new Schema(
 			default: "disponible",
 			enum: ["vendido", "disponible"],
 		},
+		product_status: {
+			type: String,
+			default: "activo",
+			enum: ["activo", "inactivo"],
+		},
 		price: {
 			minimun: NUMBER_TYPE_REQUIRE,
 			buy: NUMBER_TYPE_REQUIRE,
 			sale: NUMBER_TYPE_REQUIRE,
+			soldOn: {
+				type: Number,
+				require: true,
+				default: 0,
+			},
 		},
 		image_URL: [String],
 		specification: {
@@ -45,7 +56,8 @@ const LaptopProductSchema = new Schema(
 				default: true,
 			},
 			so: STRING_TYPE_REQUIRE,
-			brand: STRING_TYPE,
+			brand: STRING_TYPE_REQUIRE,
+			model: STRING_TYPE,
 			screen_size: STRING_TYPE,
 			ram: {
 				size: STRING_TYPE_REQUIRE,
