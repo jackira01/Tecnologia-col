@@ -20,7 +20,8 @@ const Dashboard = () => {
     setTotalPages,
     setCurrentProduct,
     setIsEdit,
-    openModal, setOpenModal
+    openModal,
+    setOpenModal,
   } = useContext(ProductContext);
 
   useEffect(() => {
@@ -58,7 +59,6 @@ const Dashboard = () => {
         <Spinner />
       ) : products.length ? (
         <>
-
           <Table hoverable>
             <Table.Head>
               {headTitle.map((value) => (

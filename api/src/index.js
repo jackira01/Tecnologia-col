@@ -15,14 +15,14 @@ const server = express();
 //Configure for specific origins
 const whitelist = ORIGIN_ALLOWED;
 const corsOptions = {
-	origin: (origin, callback) => {
-		if (whitelist.includes(origin)) {
-			console.log(origin);
-			callback(null, true);
-		} else {
-			callback(new Error('Not allowed by CORS'));
-		}
-	},
+  origin: (origin, callback) => {
+    if (whitelist.includes(origin)) {
+      console.log(origin);
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 };
 
 server.use(cors(corsOptions));
@@ -38,10 +38,10 @@ server.use('/laptop-product', laptopProductRouter);
 
 //server initialization
 server.listen(PORT, async () => {
-	try {
-		await mongoose.connect(MONGODB_URI);
-		console.log(`Conectado a MongoDB, escuchando en el puerto ${PORT}`);
-	} catch (error) {
-		console.error(error);
-	}
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log(`Conectado a MongoDB, escuchando en el puerto ${PORT}`);
+  } catch (error) {
+    console.error(error);
+  }
 });

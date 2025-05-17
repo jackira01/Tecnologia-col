@@ -27,7 +27,6 @@ export const CardComponent = ({ data }) => {
     >
       <div className="flex h-full flex-col justify-between">
         <div>
-
           {data.sale_status === 'vendido' ? (
             <span className="text-red-500 font-bold">Vendido</span>
           ) : (
