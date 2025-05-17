@@ -1,7 +1,8 @@
 {
 	"type": "module",
 	"scripts": {
-		"dev": "node --env-file .env --watch ./src/index.js"
+		"dev": "node --env-file .env --watch ./src/index.js",
+		"start": "node ./src/index.js"
 	},
 	"dependencies": {
 		"@formkit/tempo": "^0.1.2",
