@@ -4,7 +4,7 @@ import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
 import { parseDataToModal, parseDate } from '@/utils';
 import { Button, Spinner, Table } from 'flowbite-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import { MdOutlineEdit } from 'react-icons/md';
 import { ProductPagination } from '../Pagination/ProductPagination';
@@ -79,10 +79,13 @@ const Dashboard = () => {
                   <Table.Cell className="transition-colors duration-500 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     {product.name}
                   </Table.Cell>
-                  <Table.Cell>{product.sale_status}</Table.Cell>
+                  <Table.Cell>{product.status}</Table.Cell>
+                  <Table.Cell>{product.disponibility}</Table.Cell>
                   <Table.Cell>${product.price.buy}</Table.Cell>
                   <Table.Cell>${product.price.minimun}</Table.Cell>
                   <Table.Cell>${product.price.sale}</Table.Cell>
+                  <Table.Cell>${product.price.soldOn}</Table.Cell>
+
                   <Table.Cell>{parseDate(product.createdOn)}</Table.Cell>
                   <Table.Cell>
                     <Button onClick={(e) => handleClickEdit(product)}>

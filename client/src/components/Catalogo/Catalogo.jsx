@@ -51,11 +51,13 @@ export const Catalogo = () => {
         ) : (
           <div className="w-full my-10 px-10">
             <div className="mx-auto grid w-full max-w-screen-xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map((data) => (
-                <div key={data._id} className="h-full flex justify-center">
-                  <CardComponent data={data} />
-                </div>
-              ))}
+              {products
+                .filter((data) => data.status !== 'inactivo')
+                .map((data) => (
+                  <div key={data._id} className="h-full flex justify-center">
+                    <CardComponent data={data} />
+                  </div>
+                ))}
             </div>
             <ProductPagination />
           </div>

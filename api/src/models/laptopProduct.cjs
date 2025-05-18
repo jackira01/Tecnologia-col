@@ -20,12 +20,12 @@ const STRING_TYPE = {
 const LaptopProductSchema = new Schema(
   {
     name: STRING_TYPE_REQUIRE,
-    sale_status: {
+    disponibility: {
       type: String,
       default: 'disponible',
       enum: ['vendido', 'disponible'],
     },
-    product_status: {
+    status: {
       type: String,
       default: 'activo',
       enum: ['activo', 'inactivo'],
@@ -43,7 +43,7 @@ const LaptopProductSchema = new Schema(
     image_URL: [String],
     specification: {
       specification_URL: STRING_TYPE,
-      product_status: {
+      condition: {
         type: String,
         enum: ['nuevo', 'usado'],
       },
