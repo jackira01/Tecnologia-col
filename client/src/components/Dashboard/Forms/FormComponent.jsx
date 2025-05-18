@@ -26,18 +26,17 @@ export const FormComponent = () => {
   } = useContext(ProductContext);
 
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const [ArrayImages, setrrayImages] = useState([]);
+  const [ArrayImages, setArrayImages] = useState([]);
 
   // Este efecto se ejecutará cada vez que "products" cambie
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    console.log('El estado ha cambiado:');
     // Aquí puedes ejecutar cualquier lógica adicional
   }, [products]);
 
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB: 0.3, // máximo 300KB
+      maxSizeMB: 0.8, // máximo 300KB
       maxWidthOrHeight: 1024, // redimensiona si es más grande
       useWebWorker: true,
     };
@@ -97,16 +96,24 @@ export const FormComponent = () => {
       return;
     }
 
-    setrrayImages((prev) => [...prev, ...newFiles]);
+    setArrayImages((prev) => [...prev, ...newFiles]);
   };
 
   const onSubmit = async (data) => {
     setIsSubmiting(true);
     try {
-      toast.loading('Comprimiendo y subiendo imágenes...');
-      const imageUrls = await uploadMultipleImages(ArrayImages);
+      let imageUrls = currentProduct.image_URL || [];
+      if (ArrayImages.length > 0) {
+        toast.loading('Comprimiendo y subiendo imágenes...');
+        const result = await uploadMultipleImages(ArrayImages);
 
-      toast.dismiss();
+        imageUrls = [...imageUrls, ...result.filter((url) => url !== null)];
+        setArrayImages([]);
+
+        toast.dismiss();
+
+        toast.loading('Creando producto...');
+      }
 
       toast.loading('Creando producto...');
 
@@ -129,7 +136,7 @@ export const FormComponent = () => {
       setCurrentProduct(defaultValuesForm);
       toast.dismiss();
     } catch (error) {
-      setrrayImages([]);
+      setArrayImages([]);
       console.error('Error al subir las imágenes:', error);
       toast.error('Error al subir las imágenes');
       setIsSubmiting(false);
@@ -159,12 +166,35 @@ export const FormComponent = () => {
             error_message={errors.name && touched.name ? errors.name : ''}
           />
 
-          <CurrencyField
-            keyValue={'price_buy'}
-            valueForm={values.price_buy}
-            setFieldValue={setFieldValue}
-            labelName={'Precio De Compra'}
-          />
+          <div className="mb-2 block">
+            <Label
+              htmlFor="disponibility"
+              value="Disponibilidad"
+              className="text-base"
+            />
+            <Select
+              id="disponibility"
+              name="disponibility"
+              onChange={(e) => setFieldValue('disponibility', e.target.value)}
+              value={values.disponibility}
+            >
+              <option value="disponible">Disponible</option>
+              <option value="vendido">Vendido</option>
+            </Select>
+          </div>
+
+          <div className="mb-2 block">
+            <Label htmlFor="status" value="Estado" className="text-base" />
+            <Select
+              id="status"
+              name="status"
+              onChange={(e) => setFieldValue('status', e.target.value)}
+              value={values.status}
+            >
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+            </Select>
+          </div>
 
           <CurrencyField
             keyValue={'price_minimun'}
@@ -174,10 +204,24 @@ export const FormComponent = () => {
           />
 
           <CurrencyField
+            keyValue={'price_buy'}
+            valueForm={values.price_buy}
+            setFieldValue={setFieldValue}
+            labelName={'Precio De Compra'}
+          />
+
+          <CurrencyField
             keyValue={'price_sale'}
             valueForm={values.price_sale}
             setFieldValue={setFieldValue}
             labelName={'Precio De Venta'}
+          />
+
+          <CurrencyField
+            keyValue={'price_soldOn'}
+            valueForm={values.price_soldOn}
+            setFieldValue={setFieldValue}
+            labelName={'Vendido En'}
           />
 
           <div className="mb-2 block lg:col-span-2">
@@ -192,20 +236,41 @@ export const FormComponent = () => {
               multiple
               onChange={(e) => {
                 handleFileChange(e);
-              }}
+              }} /* 
+              helperText={
+                <span className="font-medium text-yellow-300">
+                  {errors.image_URL && touched.image_URL
+                    ? errors.image_URL
+                    : ''}
+                </span>
+              } */
             />
+
             <div className="mt-4 overflow-x-auto scroll-smooth">
               <div className="flex gap-2 w-max">
-                {ArrayImages.map((file, index) => (
-                  <img
-                    key={`${file.name}-${file.lastModified}-${index}`}
-                    src={URL.createObjectURL(file)}
-                    alt={`preview-${file.name}`}
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                ))}
+                {(currentProduct.image_URL?.length > 0
+                  ? currentProduct.image_URL
+                  : ArrayImages
+                ).map((item, index) => {
+                  const isURL = typeof item === 'string';
+                  const src = isURL ? item : URL.createObjectURL(item);
+
+                  return (
+                    <img
+                      key={
+                        isURL
+                          ? `image-url-${index}`
+                          : `${item.name}-${item.lastModified}-${index}`
+                      }
+                      src={src}
+                      alt={`preview-${index}`}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                  );
+                })}
               </div>
             </div>
+
             <div />
           </div>
 
@@ -220,10 +285,10 @@ export const FormComponent = () => {
               className="text-base"
             />
             <Select
-              id="product_status"
-              name="product_status"
-              onChange={(e) => setFieldValue('product_status', e.target.value)}
-              value={values.product_status}
+              id="condition"
+              name="condition"
+              onChange={(e) => setFieldValue('condition', e.target.value)}
+              value={values.condition}
             >
               <option value="nuevo">Nuevo</option>
               <option value="usado">Usado</option>
@@ -269,6 +334,7 @@ export const FormComponent = () => {
               <option value="12GB">12 RAM</option>
               <option value="14GB">14 RAM</option>
               <option value="16GB">16 RAM</option>
+              <option value="16GB">32 RAM</option>
             </Select>
           </div>
 
@@ -358,6 +424,13 @@ export const FormComponent = () => {
             setFieldValue={setFieldValue}
             labelName={'Marca De Portatil'}
             error_message={errors.brand && touched.brand ? errors.brand : ''}
+          />
+
+          <TextInputField
+            keyValue={'model'}
+            valueForm={values.model}
+            setFieldValue={setFieldValue}
+            labelName={'Modelo De Portatil'}
           />
 
           <div className="mb-2 block">

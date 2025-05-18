@@ -40,11 +40,13 @@ const DetailProduct = () => {
             {currentProduct?.specification.general_description}
           </div>
           <div className="mt-6 sm:mt-8 lg:mt-0">
-            <div>
-              {currentProduct?.sale_status === 'vendido' ? (
-                <span className="text-red-500 font-bold">Vendido</span>
+            <div className="mb-4">
+              {currentProduct?.disponibility === 'vendido' ? (
+                <span className="text-red-500 font-bold ">Vendido</span>
               ) : (
-                <span className="text-green-500 font-bold">Disponible</span>
+                <span className="text-green-500 font-bold text-xl">
+                  Disponible
+                </span>
               )}
             </div>
             <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
@@ -52,19 +54,26 @@ const DetailProduct = () => {
             </h1>
             <div className="mt-4 sm:items-center sm:gap-4 sm:flex" />
 
-            <div className="mt-8">
+            <div className="">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Especificaciones Técnicas
               </h2>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300 text-sm">
+                <li>
+                  <span className="font-semibold">Estado del producto:</span>{' '}
+                  {currentProduct?.specification.condition}{' '}
+                </li>
+
                 <li>
                   <span className="font-semibold">Sistema Operativo:</span>{' '}
                   {currentProduct?.specification.so}
                 </li>
                 <li>
                   <span className="font-semibold">Marca:</span>{' '}
-                  {currentProduct?.specification.brand}
+                  {currentProduct?.specification.brand &&
+                    currentProduct?.specification.model}
                 </li>
+
                 <li>
                   <span className="font-semibold">Pantalla:</span>{' '}
                   {currentProduct?.specification.screen_size}"
@@ -93,11 +102,6 @@ const DetailProduct = () => {
                   {currentProduct?.specification.processor.model}
                 </li>
 
-                {/* <li>
-									<span className="font-semibold">Estado del producto:</span>{' '}
-									{currentProduct?.specification.product_state}{' '}
-								</li> */}
-
                 <li>
                   <a
                     href={currentProduct?.specification.specification_URL}
@@ -113,7 +117,7 @@ const DetailProduct = () => {
 
             <div className="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
               <Button color="green">
-                <FaWhatsapp className="m-auto" color="white" />
+                <FaWhatsapp className="m-auto text-green-600 dark:text-white" />
                 WhatsApp
               </Button>
             </div>

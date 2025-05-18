@@ -27,10 +27,16 @@ export const CardComponent = ({ data }) => {
     >
       <div className="flex h-full flex-col justify-between">
         <div>
-          {data.sale_status === 'vendido' ? (
+          {data.disponibility === 'vendido' ? (
             <span className="text-red-500 font-bold">Vendido</span>
           ) : (
             <span className="text-green-500 font-bold">Disponible</span>
+          )}
+          <br />
+          {data.specification.condition === 'nuevo' ? (
+            <span className="text-blue-500 font-bold">Nuevo</span>
+          ) : (
+            <span className="text-blue-500 font-bold">Usado</span>
           )}
           <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white ">
             {data.name}
