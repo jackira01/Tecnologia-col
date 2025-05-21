@@ -3,6 +3,8 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { authUser } from './services/user';
 
+const ROLE_REFRESH_INTERVAL = 10 * 60 * 1000; // 5 minutos en milisegundos
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google,
@@ -35,6 +37,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
         token.role = createUser.role;
         return token;
+      }
+
+      if (token.email) {
+        const needsUpdate =
+          !token.updatedAt ||
+          Date.now() - token.updatedAt > ROLE_REFRESH_INTERVAL;
+
+        if (needsUpdate) {
+          const dbUser = await authUser({ user_name: token.email });
+          token.role = dbUser?.role || token.role;
+          token.updatedAt = Date.now();
+        }
       }
       return token;
     },
