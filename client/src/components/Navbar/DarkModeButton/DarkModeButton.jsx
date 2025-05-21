@@ -11,7 +11,7 @@ const DarkModeButton = () => {
     <>
       <button
         type="button"
-        className="m-1 p-1 rounded-sm bg-mainLight-card dark:bg-mainDark-card text-mainLight-text dark:text-mainDark-white "
+        className="m-1 p-1 rounded-sm text-mainLight-bg dark:text-mainDark-white "
         onClick={toggleTheme}
       >
         {theme === 'light' ? (

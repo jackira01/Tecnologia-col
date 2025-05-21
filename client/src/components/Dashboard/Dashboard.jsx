@@ -4,6 +4,8 @@ import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
 import { parseDataToModal, parseDate } from '@/utils';
 import { Button, Spinner, Table } from 'flowbite-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import { MdOutlineEdit } from 'react-icons/md';
@@ -12,6 +14,10 @@ import { ModalComponent } from './Forms/ModalComponent';
 import { headTitle } from './defaultValues';
 
 const Dashboard = () => {
+  const { data: session, status } = useSession();
+
+  const router = useRouter();
+
   const {
     products,
     loaderProducts,
@@ -23,6 +29,13 @@ const Dashboard = () => {
     openModal,
     setOpenModal,
   } = useContext(ProductContext);
+
+  useEffect(() => {
+    if (status === 'loading') return <p>Cargando...</p>;
+    if (!session) {
+      router.push('/'); // redirección al home si no hay producto
+    }
+  }, [session, status, router]);
 
   useEffect(() => {
     const fetchProducts = async () => {
