@@ -126,7 +126,7 @@ const DetailProduct = () => {
               <strong> O </strong>
               <Button
                 onClick={handleWhatsAppRedirect}
-                className="text-white"
+                className="text-green-600 dark:text-white"
                 color="green"
               >
                 <FaWhatsapp
