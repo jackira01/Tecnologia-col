@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 const SignIn = async () => {
   const session = await auth();
   // Redirección en el servidor, antes de renderizar nada
-  if (session) redirect('/');
+  if (session) return redirect('/');
   return <AuthFormGoogle />;
 };
 
