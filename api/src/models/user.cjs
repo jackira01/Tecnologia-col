@@ -4,18 +4,21 @@ const { model, Schema } = mongoose;
 
 const UserSchema = new Schema(
   {
-    name: {
+    user_id: {
+      type: String,
+      required: true,
+    },
+    user_name: {
       type: String,
       required: true,
     },
     password: {
       type: String,
-      required: true,
     },
     role: {
       type: String,
-      enum: ['admin', 'user'],
-      default: 'user',
+      enum: ['admin', 'client'],
+      default: 'client',
     },
   },
   { timestamps: true },

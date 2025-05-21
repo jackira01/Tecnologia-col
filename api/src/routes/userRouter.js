@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { postUser } from '../controllers/user/postUser.js';
-import { verifyUser } from '../controllers/user/auth.js';
+import { verifyGoogleUser } from '../controllers/user/authGoogle.js';
+import { postUser, updateUser } from '../controllers/user/postUser.js';
 
 export const userRouter = Router();
 
 userRouter.post('/create', postUser);
-userRouter.get('/auth', verifyUser);
+userRouter.post('/update/:id', updateUser);
+// userRouter.get('/auth_credentials', verifyUserCredentials);
+userRouter.post('/auth_google', verifyGoogleUser);

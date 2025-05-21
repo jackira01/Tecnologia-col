@@ -1,5 +1,5 @@
-import UserSchema from '../../models/user.cjs';
 import bcrypt from 'bcrypt';
+import UserSchema from '../../models/user.cjs';
 const saltRounds = 10;
 
 export const postUser = async (req, res) => {
@@ -36,6 +36,21 @@ export const postUser = async (req, res) => {
 
       res.status(201).json({ user: createUser, message: 'Creado con exito' });
     });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+  // Opción para devolver el documento actualizado
+  const options = { new: true };
+  try {
+    const updateProduct = await UserSchema.findByIdAndUpdate(id, data, options);
+    res
+      .status(201)
+      .json({ product: updateProduct, message: 'Actualizado con exito' });
   } catch (error) {
     res.status(500).json({ message: error });
   }

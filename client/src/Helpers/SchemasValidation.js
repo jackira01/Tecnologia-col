@@ -27,3 +27,15 @@ export const CreateProductSchema = Yup.object().shape({
 
   description: Yup.string().min(2, 'Muy corto!').max(800, 'Muy largo!'),
 });
+
+export const CreateUserSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Muy corto!')
+    .max(50, 'Muy largo!')
+    .required('Nombre requerido'),
+
+  password: Yup.string()
+    .min(6, 'Contraseña muy corta')
+    .max(50, 'Contraseña muy larga')
+    .required('Contraseña requerida'),
+});

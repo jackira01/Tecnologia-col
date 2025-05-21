@@ -1,5 +1,6 @@
 import { ProductContext } from '@/context/productContext';
 import { Button, Card } from 'flowbite-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useContext } from 'react';
 import { BsDeviceHdd } from 'react-icons/bs';
@@ -22,11 +23,18 @@ export const CardComponent = ({ data }) => {
   return (
     <Card
       className="transition-colors duration-500 h-full w-full min-w-[250px] max-w-[300px] border-none text-mainLight-text dark:bg-mainDark-card dark:text-mainDark-text shadow-md"
-      imgSrc={data.image_URL[0]}
-      imgAlt={data.name}
+      /* imgSrc={data.image_URL[0]}
+      imgAlt={data.name} */
     >
-      <div className="flex h-full flex-col justify-between">
-        <div>
+      <Image
+        src={data.image_URL[0]}
+        alt={data.name}
+        width={500}
+        height={200}
+        className="w-full h-[200px] object-cover rounded-t-lg"
+      />
+      <div className="flex h-full flex-col justify-between gap-0">
+        <>
           {data.disponibility === 'vendido' ? (
             <span className="text-red-500 font-bold">Vendido</span>
           ) : (
@@ -60,7 +68,7 @@ export const CardComponent = ({ data }) => {
               text={`${data.specification.processor.brand} ${data.specification.processor.model}`}
             />
           </div>
-        </div>
+        </>
 
         <Link
           href={`/${data._id}`}

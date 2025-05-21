@@ -28,13 +28,17 @@ const DetailProduct = () => {
 
   if (!currentProduct.specification) return null; // para evitar que se renderice contenido basura
 
+  const handleWhatsAppRedirect = () => {
+    window.open('https://wa.me/573126193489', '_blank');
+  };
+
   return (
-    <section className="py-8 antialiased">
-      <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0">
+    <section className="py-8 antialiased h-screen">
+      <div className="max-w-screen-2xl px-4 mx-auto 2xl:px-0">
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-          <div>
+          <div className="">
             <CarouselComponent images={currentProduct.image_URL} />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">
               Descripcion general
             </h2>
             {currentProduct?.specification.general_description}
@@ -116,9 +120,22 @@ const DetailProduct = () => {
             </div>
 
             <div className="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-              <Button color="green">
-                <FaWhatsapp className="m-auto text-green-600 dark:text-white" />
-                WhatsApp
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Escribenos al WhatsApp al 312 619 3489
+              </h2>{' '}
+              <strong> O </strong>
+              <Button
+                onClick={handleWhatsAppRedirect}
+                className="text-white"
+                color="green"
+              >
+                <FaWhatsapp
+                  size={30}
+                  className="m-auto text-green-600 dark:text-white"
+                />
+                <p className="m-auto text-semibold text-xl">
+                  Abre WhatsApp Web
+                </p>
               </Button>
             </div>
           </div>

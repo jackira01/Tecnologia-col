@@ -2,7 +2,6 @@
   "name": "colombia-portatiles",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +15,7 @@
     "flowbite-react": "^0.10.1",
     "formik": "^2.4.6",
     "next": "14.2.5",
+    "next-auth": "5.0.0-beta.28",
     "next-cloudinary": "^6.6.2",
     "react": "^18.3.1",
     "react-currency-input-field": "^3.8.0",

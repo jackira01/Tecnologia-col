@@ -1,5 +1,15 @@
-const { default: Dashboard } = require('@/components/Dashboard/Dashboard');
+import { auth } from '@/auth';
+import Dashboard from '@/components/Dashboard/Dashboard';
+import { redirect } from 'next/navigation';
 
-const dashboard = () => <Dashboard />;
+const DashboardPage = async () => {
+  const session = await auth();
+  // Redirección en el servidor, antes de renderizar nada
+  if (!session?.user || session.user.role !== 'admin') {
+    redirect('/');
+  }
 
-export default dashboard;
+  return <Dashboard />;
+};
+
+export default DashboardPage;
