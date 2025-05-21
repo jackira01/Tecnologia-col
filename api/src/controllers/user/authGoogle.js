@@ -1,13 +1,12 @@
 import UserSchema from '../../models/user.cjs';
 
 export const verifyGoogleUser = async (req, res) => {
-  const { user_name, id } = req.body;
+  const { user_name } = req.body;
   try {
     let findUser = await UserSchema.findOne({ user_name });
     if (!findUser) {
       const newUser = await UserSchema.create({
         user_name,
-        user_id: id,
         role: 'client', // o lo que quieras por defecto
       });
       findUser = newUser;

@@ -8,16 +8,14 @@ import { userRouter } from './routes/userRouter.js';
 
 const { PORT, ORIGIN_ALLOWED, MONGODB_URI, ENVIROMENT } = process.env;
 
-/* const clientOptions = {
-    serverApi: { version: '1', strict: true, deprecationErrors: true, }, ssl: true,
-}; */
-
 const server = express();
+
 //Configure for specific origins
-const whitelist = ORIGIN_ALLOWED;
+const whitelist = JSON.parse(ORIGIN_ALLOWED || '[]');
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (whitelist.includes(origin)) {
+    if (!origin || whitelist.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -26,7 +24,7 @@ const corsOptions = {
 };
 
 if (ENVIROMENT === 'development') {
-  server.use(cors('*'));
+  server.use(cors()); // no necesitas '*', cors() permite todos por defecto
 } else {
   server.use(cors(corsOptions));
 }
