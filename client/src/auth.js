@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { authUser } from './services/user';
 
-const ROLE_REFRESH_INTERVAL = 1 * 60 * 1000; // 5 minutos en milisegundos
+const ROLE_REFRESH_INTERVAL = 10 * 60 * 1000; // 5 minutos en milisegundos
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
