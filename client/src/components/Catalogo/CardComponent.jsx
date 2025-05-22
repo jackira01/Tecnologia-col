@@ -1,4 +1,5 @@
 import { ProductContext } from '@/context/productContext';
+import { formatPrice } from '@/utils';
 import { Button, Card } from 'flowbite-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -50,7 +51,7 @@ export const CardComponent = ({ data }) => {
             {data.name}
           </h5>
           <p className="mb-3 font-bold text-gray-700 dark:text-gray-300">
-            ${data.price.sale}
+            {formatPrice(data.price.sale)}
           </p>
 
           {/* Tus especificaciones (iconos + texto) */}

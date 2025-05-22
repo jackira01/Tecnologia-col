@@ -1,4 +1,5 @@
 import { diffDays, format } from '@formkit/tempo';
+import { formatValue } from 'react-currency-input-field';
 const currentDate = new Date();
 
 export const parseData = (data) => ({
@@ -96,4 +97,17 @@ export const defaultValuesForm = {
   screen_size: '',
   specification_URL: '',
   description: '',
+};
+
+export const formatPrice = (price) => {
+  const formattedValue1 = formatValue({
+    value: String(price),
+    groupSeparator: ',',
+    decimalSeparator: '.',
+    prefix: '$',
+  });
+
+  console.log(formattedValue1);
+
+  return formattedValue1;
 };
