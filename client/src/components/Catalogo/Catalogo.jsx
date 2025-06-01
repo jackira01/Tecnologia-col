@@ -1,26 +1,31 @@
 import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
 import { Spinner } from 'flowbite-react';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ProductPagination } from '../Pagination/ProductPagination';
 import SideBarComponent from '../SideBar/SideBarComponent';
-const { CardComponent } = require('./CardComponent');
+import { CardComponent } from './CardComponent';
 
 export const Catalogo = () => {
-  const {
-    products,
-    loaderProducts,
-    setLoaderProducts,
-    setProducts,
-    setTotalPages,
-    error,
-    setError,
-  } = useContext(ProductContext);
+  const { setTotalPages, error, setError, currentPage, products, setProducts, setCurrentPage } =
+    useContext(ProductContext);
+
+  const [ loaderProducts, setLoaderProducts ] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoaderProducts(true);
-      const response = await getProducts();
+
+      const data = {
+        page: currentPage,
+        limit: 8,
+        filters: {
+          active: true,
+        },
+      };
+
+      const response = await getProducts(data);
+
       if (response?.docs.length) {
         setTotalPages(response.totalPages);
         setProducts(response.docs);
@@ -32,12 +37,16 @@ export const Catalogo = () => {
       }
     };
     fetchProducts();
+  }, [setLoaderProducts, setProducts, setTotalPages, setError, currentPage]);
 
-    return () => {
-      setTotalPages(1);
-      setProducts([]);
-    };
-  }, [setLoaderProducts, setProducts, setTotalPages, setError]);
+  useEffect(() => {
+  return () => {
+    // Solo se ejecuta cuando el componente se desmonta completamente
+    setTotalPages(1);
+    setProducts([]);
+    setCurrentPage(1);
+  };
+}, []); // Array vacío = solo al desmontar
 
   return (
     <>
@@ -51,13 +60,13 @@ export const Catalogo = () => {
         ) : (
           <div className="w-full my-10 px-10">
             <div className="mx-auto grid w-full max-w-screen-xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products
-                .filter((data) => data.status !== 'inactivo')
-                .map((data) => (
+              {products?.map((data) => {
+                return (
                   <div key={data._id} className="h-full flex justify-center">
                     <CardComponent data={data} />
                   </div>
-                ))}
+                );
+              })}
             </div>
             <ProductPagination />
           </div>
