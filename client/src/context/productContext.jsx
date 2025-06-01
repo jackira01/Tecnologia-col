@@ -16,24 +16,6 @@ export const ProductProvider = ({ children }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(undefined);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoaderProducts(true);
-      const response = await getProducts();
-      if (!response) {
-        setError('No se encontraron productos');
-        setProducts([]);
-        setLoaderProducts(false);
-        setTotalPages(1);
-        return;
-      }
-      setTotalPages(response.totalPages);
-      setProducts(response.docs);
-      setLoaderProducts(false);
-    };
-    fetchProducts();
-  }, []);
-
   return (
     <ProductContext.Provider
       value={{
