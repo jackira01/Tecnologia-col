@@ -2,12 +2,6 @@
 
 import { Catalogo } from '@/components/Catalogo/Catalogo';
 
-const catalogoPage = () => {
-  return (
-    <div>
-      <Catalogo />
-    </div>
-  );
-};
+const catalogoPage = () => <Catalogo />;
 
 export default catalogoPage;

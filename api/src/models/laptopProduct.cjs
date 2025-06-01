@@ -25,11 +25,7 @@ const LaptopProductSchema = new Schema(
       default: 'disponible',
       enum: ['vendido', 'disponible'],
     },
-    status: {
-      type: String,
-      default: 'activo',
-      enum: ['activo', 'inactivo'],
-    },
+    active: Boolean,
     price: {
       minimun: NUMBER_TYPE_REQUIRE,
       buy: NUMBER_TYPE_REQUIRE,

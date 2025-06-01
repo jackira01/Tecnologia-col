@@ -5,6 +5,6 @@ import { putProduct } from '../controllers/product/putProduct.js';
 
 export const laptopProductRouter = Router();
 
-laptopProductRouter.get('/', getProduct);
+laptopProductRouter.post('/', getProduct);
 laptopProductRouter.post('/create', postProduct);
 laptopProductRouter.post('/update/:id', putProduct);
