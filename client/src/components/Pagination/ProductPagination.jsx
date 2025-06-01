@@ -9,25 +9,25 @@ export const ProductPagination = () => {
   const {
     setProducts,
     totalPages,
-    loaderProducts,
-    setLoaderProducts,
     currentPage,
-    setCurrentPage,
+    setCurrentPage
   } = useContext(ProductContext);
 
+  const data = {
+    page: currentPage,
+    limit: 8,
+    filters: {},
+  };
+
   const onPageChange = async (page) => {
-    setLoaderProducts(true);
-    const response = await getProducts(page);
+    const response = await getProducts({data, page});
     setProducts(response.docs);
     setCurrentPage(response.page);
-    setLoaderProducts(false);
   };
 
   return (
     <div className="col-span-3 mt-10 flex w-full items-center justify-center">
-      {loaderProducts ? (
-        <Spinner size="md" />
-      ) : (
+      { 
         <div className="flex flex-col justify-end">
           <p className="text-mainLight-text dark:text-mainDark-white ml-10">
             pagina <strong>{currentPage}</strong> de{' '}
@@ -41,7 +41,7 @@ export const ProductPagination = () => {
             onPageChange={onPageChange}
           />
         </div>
-      )}
+      }
     </div>
   );
 };

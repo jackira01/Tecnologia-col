@@ -106,8 +106,5 @@ export const formatPrice = (price) => {
     decimalSeparator: '.',
     prefix: '$',
   });
-
-  console.log(formattedValue1);
-
   return formattedValue1;
 };

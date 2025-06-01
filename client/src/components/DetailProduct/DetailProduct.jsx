@@ -150,7 +150,7 @@ const DetailProduct = () => {
                 size={30}
                 className="text-green-600 dark:text-white"
               />
-              <p className="text-semibold text-xl">Abre WhatsApp Web</p>
+              <p className="text-semibold text-xl">Abre WhatsApp</p>
             </Button>
           </div>
         </div>
