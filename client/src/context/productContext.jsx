@@ -1,8 +1,7 @@
 'use client';
 
-import { getProducts } from '@/services/products';
 import { defaultValuesForm } from '@/utils';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
 export const ProductContext = createContext();
 
