@@ -11,25 +11,29 @@ export const getProducts = async (datapost) => {
   return data;
 };
 
-export const createProducts = async (data) => {
+export const createProducts = async (dataObj) => {
   try {
-    const { data } = await axios.post(`${API_URL}/laptop-product/create`, data);
-    toast.success(response.data.message);
+    const { data } = await axios.post(
+      `${API_URL}/laptop-product/create`,
+      dataObj,
+    );
+    toast.success(data.message);
     return data.product;
   } catch (error) {
     toast.error('Ups! Algo paso...');
   }
 };
 
-export const updateProducts = async (data) => {
+export const updateProducts = async (dataObj) => {
   try {
     const { data } = await axios.post(
-      `${API_URL}/laptop-product/update/${data._id}`,
-      data,
+      `${API_URL}/laptop-product/update/${dataObj._id}`,
+      dataObj,
     );
     toast.success(data.message);
-    return response.data.product;
+    return data.product;
   } catch (error) {
+    console.error('Error updating product:', error);
     toast.error('Ups! Algo paso...');
   }
 };

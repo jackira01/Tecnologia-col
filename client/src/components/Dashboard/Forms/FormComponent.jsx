@@ -20,6 +20,8 @@ export const FormComponent = () => {
   const { currentProduct, isEdit, products, setOpenModal, setCurrentProduct } =
     useContext(ProductContext);
 
+  const [ArrayImages, setArrayImages] = useState([]);
+
   const queryClient = useQueryClient();
 
   const {
@@ -29,7 +31,6 @@ export const FormComponent = () => {
   } = useMutation({
     mutationFn: (data) => updateProducts(data),
     onSuccess: () => {
-      toast.success('Producto actualizado con éxito');
       queryClient.invalidateQueries(['tableProduct']);
       queryClient.invalidateQueries(['catalogueProducts']);
     },
@@ -46,7 +47,6 @@ export const FormComponent = () => {
   } = useMutation({
     mutationFn: (data) => createProducts(data),
     onSuccess: () => {
-      toast.success('Producto creado con éxito');
       queryClient.invalidateQueries(['tableProduct']);
       queryClient.invalidateQueries(['catalogueProducts']);
     },
@@ -55,9 +55,6 @@ export const FormComponent = () => {
       toast.error('Error al crear el producto');
     },
   });
-
-  const [isSubmiting, setIsSubmiting] = useState(false);
-  const [ArrayImages, setArrayImages] = useState([]);
 
   // Este efecto se ejecutará cada vez que "products" cambie
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -93,7 +90,6 @@ export const FormComponent = () => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmiting(true);
     try {
       let imageUrls = currentProduct.image_URL || [];
       if (ArrayImages.length > 0) {
@@ -121,21 +117,15 @@ export const FormComponent = () => {
         : createMutation(payload); // Si es creación, no se envía ID
 
       setCurrentProduct(defaultValuesForm);
-      toast.success(
-        isEdit ? 'Producto actualizado con éxito' : 'Producto creado con éxito',
-      );
       toast.dismiss();
     } catch (error) {
       setArrayImages([]);
       console.error('Error al subir las imágenes:', error);
       toast.error('Error al subir las imágenes');
-      setIsSubmiting(false);
       return;
     }
 
-    setIsSubmiting(false);
     setOpenModal(false);
-    toast.success('Producto creado con exito');
     return;
   };
 
