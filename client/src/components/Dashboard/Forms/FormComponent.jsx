@@ -7,23 +7,54 @@ import { ProductContext } from '@/context/productContext';
 
 import { createProducts, updateProducts } from '@/services/products';
 import { defaultValuesForm, parseData } from '@/utils';
-import axios from 'axios';
-import imageCompression from 'browser-image-compression';
+
 import { Button, FileInput, Label, Select, Spinner } from 'flowbite-react';
 import { Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
 import { CurrencyField, TextInputField } from './CustomComponents/CustomInputs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { uploadMultipleImages } from '@/Helpers/tools';
 
 export const FormComponent = () => {
   // Context
+  const { currentProduct, isEdit, products, setOpenModal, setCurrentProduct } =
+    useContext(ProductContext);
+
+  const queryClient = useQueryClient();
+
   const {
-    currentProduct,
-    isEdit,
-    setProducts,
-    products,
-    setOpenModal,
-    setCurrentProduct,
-  } = useContext(ProductContext);
+    mutate: updateMutation,
+    isLoading: isLoadingUpdate,
+    isError: isErrorUpdate,
+  } = useMutation({
+    mutationFn: (data) => updateProducts(data),
+    onSuccess: () => {
+      toast.success('Producto actualizado con éxito');
+      queryClient.invalidateQueries(['tableProduct']);
+      queryClient.invalidateQueries(['catalogueProducts']);
+    },
+    onError: () => {
+      // console.error('Error al actualizar el producto:', error);
+      toast.error('Error al actualizar el producto');
+    },
+  });
+
+  const {
+    mutate: createMutation,
+    isLoading: isLoadingCreate,
+    isError: isErrorCreate,
+  } = useMutation({
+    mutationFn: (data) => createProducts(data),
+    onSuccess: () => {
+      toast.success('Producto creado con éxito');
+      queryClient.invalidateQueries(['tableProduct']);
+      queryClient.invalidateQueries(['catalogueProducts']);
+    },
+    onError: () => {
+      // console.error('Error al actualizar el producto:', error);
+      toast.error('Error al crear el producto');
+    },
+  });
 
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [ArrayImages, setArrayImages] = useState([]);
@@ -33,44 +64,6 @@ export const FormComponent = () => {
   useEffect(() => {
     // Aquí puedes ejecutar cualquier lógica adicional
   }, [products]);
-
-  const compressImage = async (file) => {
-    const options = {
-      maxSizeMB: 0.8, // máximo 300KB
-      maxWidthOrHeight: 1024, // redimensiona si es más grande
-      useWebWorker: true,
-    };
-    try {
-      return await imageCompression(file, options);
-    } catch (error) {
-      console.error('Error al comprimir imagen:', error);
-      return file; // si falla, sigue con el original
-    }
-  };
-
-  const uploadMultipleImages = async (filesArray) => {
-    const uploadedUrls = [];
-
-    for (const file of filesArray) {
-      try {
-        const compressed = await compressImage(file);
-        const formData = new FormData();
-        formData.append('file', compressed);
-        formData.append('upload_preset', 'tecnologia_col');
-
-        const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dikkcrred/image/upload',
-          formData,
-        );
-        uploadedUrls.push(response.data.secure_url);
-      } catch (error) {
-        console.error(`Error al subir ${file.name}:`, error);
-        uploadedUrls.push(null); // O maneja según tu lógica
-      }
-    }
-
-    return uploadedUrls;
-  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -111,29 +104,26 @@ export const FormComponent = () => {
         setArrayImages([]);
 
         toast.dismiss();
-
-        toast.loading('Creando producto...');
+        toast.success('Imágenes subidas con éxito');
       }
-
-      toast.loading('Creando producto...');
 
       const payload = parseData({
         ...data,
         image_URL: imageUrls, // ahora es un array
       });
 
-      const newProduct = isEdit
-        ? await updateProducts({ ...payload, _id: data._id })
-        : await createProducts(payload);
+      toast.loading(
+        isEdit ? 'Actualizando producto...' : 'Creando producto...',
+      );
 
-      if (isEdit) {
-        setProducts((prev) =>
-          prev.map((p) => (p._id === newProduct._id ? newProduct : p)),
-        );
-      } else {
-        setProducts((prev) => [...prev, newProduct]);
-      }
+      isEdit
+        ? updateMutation({ ...payload, _id: data._id }) // Si es edición, se envía el ID
+        : createMutation(payload); // Si es creación, no se envía ID
+
       setCurrentProduct(defaultValuesForm);
+      toast.success(
+        isEdit ? 'Producto actualizado con éxito' : 'Producto creado con éxito',
+      );
       toast.dismiss();
     } catch (error) {
       setArrayImages([]);
@@ -492,7 +482,7 @@ export const FormComponent = () => {
             }
           />
 
-          {isSubmiting ? (
+          {isLoadingCreate || isLoadingUpdate ? (
             <div className="flex col-span-2 items-center justify-center">
               <Spinner />
             </div>

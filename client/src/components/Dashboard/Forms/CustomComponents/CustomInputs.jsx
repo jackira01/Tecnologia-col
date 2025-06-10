@@ -33,7 +33,7 @@ export const TextInputField = ({
       name={keyValue}
       onChange={(e) => setFieldValue(keyValue, e.target.value)}
       value={valueForm}
-      helperText={
+      helpertext={
         <span className="font-medium text-yellow-300">{error_message}</span>
       }
     />
