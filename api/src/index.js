@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import morgan from 'morgan';
 
 import { laptopProductRouter } from './routes/laptopProductRouter.js';
+import { salesRouter } from './routes/sales/salesRouter.js';
 import { userRouter } from './routes/userRouter.js';
 
 const { PORT, ORIGIN_ALLOWED, MONGODB_URI, ENVIROMENT } = process.env;
@@ -38,6 +39,7 @@ server.use(express.json());
 //routes
 server.use('/laptop-product', laptopProductRouter);
 server.use('/user', userRouter);
+server.use('/sales', salesRouter);
 
 //server initialization
 server.listen(PORT, async () => {
