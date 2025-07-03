@@ -2,11 +2,11 @@
 
 import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
+import { useQuery } from '@tanstack/react-query';
 import { Button, Spinner } from 'flowbite-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import { ProductPagination } from '../Pagination/ProductPagination';
 import { ModalComponent } from './Forms/ModalComponent';
@@ -38,14 +38,13 @@ const Dashboard = () => {
         filters: {},
       }),
     refetchOnMount: false, // No refetch al montar si hay datos en cache
-    enabled: !!session, // Solo ejecuta si hay sesión activa
   });
 
   // Manejo de autenticación
   useEffect(() => {
-    if (status !== 'loading' && !session) {
+    /* if (status !== 'loading' && !session) {
       router.push('/');
-    }
+    } */
     if (productsData) {
       setTotalPages(productsData.totalPages || 1); // Asegura que totalPages sea al menos 1
     }
@@ -53,7 +52,10 @@ const Dashboard = () => {
     return () => {
       setTotalPages(1);
     };
-  }, [session, router, productsData, setTotalPages, status]);
+  }, [
+    /* session,  */ /* router, */ productsData,
+    setTotalPages /* , status */,
+  ]);
 
   // Loading state durante autenticación
   if (status === 'loading' || isLoading) {

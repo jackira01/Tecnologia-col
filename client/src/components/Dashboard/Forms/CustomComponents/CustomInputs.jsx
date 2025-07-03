@@ -8,8 +8,11 @@ export const CurrencyField = ({
   labelName,
 }) => (
   <div className="mb-2 block">
-    <Label htmlFor={keyValue} value={labelName} className="text-base" />
+    <Label htmlFor={keyValue} className="text-base">
+      {labelName}
+    </Label>
     <CustomCurrencyInput
+      id={keyValue}
       onValueChange={(value, name, values) => {
         setFieldValue(keyValue, value);
       }}
@@ -26,9 +29,9 @@ export const TextInputField = ({
   error_message,
 }) => (
   <div className="mb-2 block">
-    <Label htmlFor={keyValue} value={labelName} className="text-base" />
     <TextInput
       id={labelName}
+      placeholder={labelName}
       type="text"
       name={keyValue}
       onChange={(e) => setFieldValue(keyValue, e.target.value)}
