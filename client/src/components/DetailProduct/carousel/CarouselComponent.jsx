@@ -2,7 +2,7 @@ import { Carousel } from 'flowbite-react';
 
 const CarouselComponent = ({ images }) => {
   return (
-    <div className="h-72 xl:h-96">
+    <div className="h-72 xl:h-[600px]">
       <Carousel slideInterval={5000}>
         {images.map((image, index) => (
           <img

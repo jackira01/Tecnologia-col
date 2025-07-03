@@ -1,6 +1,4 @@
-const {
-  default: DetailProduct,
-} = require('@/components/DetailProduct/DetailProduct');
+const { default: DetailProduct } = require('@/components/Navbar/DetailProduct');
 
 const detailProductPage = () => {
   return <DetailProduct />;
