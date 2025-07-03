@@ -63,9 +63,7 @@ export const NavbarComponent = () => {
             <IoIosLogOut size={25} />
           </Button>
         ) : (
-          <Button className="m-auto" onClick={() => router.push('/sign-in')}>
-            <FaUser />
-          </Button>
+          <></>
         )}
         <NavbarToggle />
       </div>
