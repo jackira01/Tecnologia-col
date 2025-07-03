@@ -8,13 +8,13 @@ import {
   TableRow,
 } from 'flowbite-react';
 
-import { headTitle } from './defaultValues';
-import { MdOutlineEdit } from 'react-icons/md';
+import { ProductContext } from '@/context/productContext';
 import { parseDataToModal, parseDate } from '@/utils';
 import { useContext } from 'react';
-import { ProductContext } from '@/context/productContext';
+import { MdOutlineEdit } from 'react-icons/md';
+import { headTitle } from '../defaultValues';
 
-const TableComponent = ({ products }) => {
+const DashbProductList = ({ products }) => {
   const { setCurrentProduct, setIsEdit, setOpenModal } =
     useContext(ProductContext);
 
@@ -66,4 +66,4 @@ const TableComponent = ({ products }) => {
     </Table>
   );
 };
-export default TableComponent;
+export default DashbProductList;

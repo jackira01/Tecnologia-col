@@ -37,3 +37,13 @@ export const updateProducts = async (dataObj) => {
     toast.error('Ups! Algo paso...');
   }
 };
+
+export const getSalesSummary = async () => {
+  try {
+    const { data } = await axios.get(`${API_URL}/sales/summary`);
+    return data;
+  } catch (error) {
+    toast.error('No se pudo obtener el resumen de ventas');
+    return null;
+  }
+};
