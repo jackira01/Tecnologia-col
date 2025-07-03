@@ -1,12 +1,12 @@
 'use client';
 
 import { ProductContext } from '@/context/productContext';
+import { formatPrice } from '@/utils';
 import { Button } from 'flowbite-react';
 import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 import { FaWhatsapp } from 'react-icons/fa';
-import CarouselComponent from './carousel/CarouselComponent';
-import { formatPrice } from '@/utils';
+import CarouselComponent from '../DetailProduct/carousel/CarouselComponent';
 
 const DetailProduct = () => {
   const { currentProduct } = useContext(ProductContext);
@@ -39,16 +39,27 @@ const DetailProduct = () => {
         {/* Cambio principal aquí: estructura de grid más limpia */}
         <div className="lg:grid lg:grid-cols-2 lg:grid-rows-2 lg:gap-8 xl:gap-10 w-full">
           {/* Columna izquierda (imágenes) */}
-          <div className="lg:row-start-1">
+          <div className="lg:row-start-1 ">
             <CarouselComponent images={currentProduct.image_URL} />
-          </div>
 
-          {/* Descripción general */}
-          <div className="lg:col-start-1 lg:row-start-2">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Descripción general
-            </h2>
-            <p>{currentProduct?.specification.general_description}</p>
+            {/* WhatsApp */}
+            <div className="flex flex-col items-center mt-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Escríbenos al WhatsApp al 312 619 3489
+              </h2>
+              <span>O</span>
+              <Button
+                onClick={handleWhatsAppRedirect}
+                className="text-green-600 dark:text-white flex justify-center items-center gap-2"
+                color="green"
+              >
+                <FaWhatsapp
+                  size={30}
+                  className="text-green-600 dark:text-white"
+                />
+                <p className="text-semibold text-xl">Contactar por WhatsApp</p>
+              </Button>
+            </div>
           </div>
 
           {/* Columna derecha (contenido) */}
@@ -132,26 +143,11 @@ const DetailProduct = () => {
                 </li>
               </ul>
             </div>
-          </div>
-
-          {/* WhatsApp */}
-          <div className="flex flex-col items-center text-center gap-4 pt-4 lg:col-start-2">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Escríbenos al WhatsApp al{' '}
-              <p className="text-blue-600">312 619 3489</p>
+            {/* Descripción general */}
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Descripción general
             </h2>
-            <span>O</span>
-            <Button
-              onClick={handleWhatsAppRedirect}
-              className="text-green-600 dark:text-white flex justify-center items-center gap-2"
-              color="green"
-            >
-              <FaWhatsapp
-                size={30}
-                className="text-green-600 dark:text-white"
-              />
-              <p className="text-semibold text-xl">Abre WhatsApp</p>
-            </Button>
+            <p>{currentProduct?.specification.general_description}</p>
           </div>
         </div>
       </div>
