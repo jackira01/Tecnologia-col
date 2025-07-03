@@ -32,7 +32,6 @@ const ProductsTab = () => {
         filters: {},
       }),
     refetchOnMount: false, // No refetch al montar si hay datos en cache
-    enabled: !!session, // Solo ejecuta si hay sesión activa
   });
 
   // Manejo de autenticación
