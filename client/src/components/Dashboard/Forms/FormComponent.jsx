@@ -8,12 +8,12 @@ import { ProductContext } from '@/context/productContext';
 import { createProducts, updateProducts } from '@/services/products';
 import { defaultValuesForm, parseData } from '@/utils';
 
+import { uploadMultipleImages } from '@/Helpers/tools';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, FileInput, Label, Select, Spinner } from 'flowbite-react';
 import { Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
 import { CurrencyField, TextInputField } from './CustomComponents/CustomInputs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { uploadMultipleImages } from '@/Helpers/tools';
 
 export const FormComponent = () => {
   // Context
@@ -180,7 +180,7 @@ export const FormComponent = () => {
             keyValue={'price_minimun'}
             valueForm={values.price_minimun}
             setFieldValue={setFieldValue}
-            labelName={'Precio Minimo De Venta'}
+            labelName="Precio Minimo De Venta"
           />
 
           <CurrencyField
