@@ -40,6 +40,12 @@ server.use(express.json());
 server.use('/laptop-product', laptopProductRouter);
 server.use('/user', userRouter);
 server.use('/sales', salesRouter);
+server.use('/welcome', (req, res) => {
+  res.status(200).json({
+    message: 'Welcome to the API',
+    status: 'success',
+  });
+});
 
 //server initialization
 server.listen(PORT, async () => {
