@@ -5,7 +5,7 @@ const currentDate = new Date();
 export const parseData = (data) => ({
   name: data.name,
   disponibility: data.disponibility,
-  status: data.status,
+  active: data.status === 'activo',
   price: {
     minimun: data.price_minimun,
     buy: data.price_buy,
@@ -42,7 +42,7 @@ export const parseDataToModal = (data) => ({
   _id: data._id,
   name: data.name || '',
   disponibility: data.disponibility || 'disponible',
-  status: data.status || 'activo',
+  status: data.active ? 'activo' : 'inactivo',
   condition: data.specification.condition || 'nuevo',
   price_soldOn: data.price.soldOn || 0,
   price_minimun: data.price.minimun || '0',
