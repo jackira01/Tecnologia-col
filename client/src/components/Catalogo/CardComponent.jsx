@@ -62,7 +62,13 @@ export const CardComponent = ({ data }) => {
             />
             <SpecItem
               icon={<BsDeviceHdd />}
-              text={`Almacenamiento ${data.specification.storage.size} ${data.specification.storage.storage_type}`}
+              text={
+                Array.isArray(data.specification.storage)
+                  ? data.specification.storage.map((s, i) => 
+                      `${s.size} ${s.storage_type}`
+                    ).join(' + ')
+                  : `Almacenamiento ${data.specification.storage?.size} ${data.specification.storage?.storage_type}`
+              }
             />
             <SpecItem
               icon={<HiMiniCpuChip />}

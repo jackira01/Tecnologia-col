@@ -9,26 +9,42 @@ import {
   TableHead,
   TableHeadCell,
   TableRow,
+  Tooltip,
 } from 'flowbite-react';
 
 import { ProductContext } from '@/context/productContext';
 import { parseDataToModal, parseDate } from '@/utils';
 import { useContext, useState } from 'react';
-import { MdOutlineEdit } from 'react-icons/md';
+import { MdOutlineEdit, MdRemoveRedEye } from 'react-icons/md';
 import { headTitle } from '../defaultValues';
 import Image from 'next/image';
+import { SaleStatusBadge } from '@/components/Dashboard/SaleStatusBadge';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+
 
 const DashbProductList = ({ products }) => {
   const { setCurrentProduct, setIsEdit, setOpenModal } =
     useContext(ProductContext);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
+  const router = useRouter();
+  const { data: session } = useSession();
 
   const handleClickEdit = (product) => {
     const parsedObj = parseDataToModal(product);
     setCurrentProduct(parsedObj);
     setIsEdit(true);
     setOpenModal(true);
+  };
+
+  const handleView = (productId) => {
+    // Solo admins pueden ver productos inactivos/vendidos
+    if (session?.user?.role === 'admin') {
+      router.push(`/${productId}`);
+    } else {
+      router.push('/');
+    }
   };
 
   const handleImageClick = (imageUrl) => {
@@ -43,7 +59,7 @@ const DashbProductList = ({ products }) => {
           <TableRow>
             {headTitle.map((value) => (
               <TableHeadCell
-                className="text-base transition-colors duration-500"
+                className="text-sm transition-colors duration-500"
                 key={value.key}
               >
                 {value.label}
@@ -73,20 +89,48 @@ const DashbProductList = ({ products }) => {
                   </div>
                 )}
               </TableCell>
-              <TableCell className="transition-colors duration-500 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                {product.name}
+              <TableCell className="transition-colors duration-500 max-w-xs">
+                <div className="whitespace-nowrap overflow-hidden text-ellipsis font-medium text-gray-900 dark:text-white" title={product.name}>
+                  {product.name}
+                </div>
               </TableCell>
               <TableCell>{product.active ? 'activo' : 'inactivo'}</TableCell>
               <TableCell>{product.disponibility}</TableCell>
+              <TableCell>
+                {product.saleStatus && product.disponibility !== 'vendido' && (
+                  <Tooltip 
+                    content={
+                      <div className="max-w-sm">
+                        <p className="font-semibold">{product.saleStatus.label}</p>
+                        <p className="text-xs mt-1">{product.saleStatus.description}</p>
+                        {product.saleStatus.suggestedPrice && (
+                          <p className="text-xs mt-1 text-yellow-300">
+                            Precio sugerido: ${product.saleStatus.suggestedPrice.toLocaleString('es-CO')}
+                          </p>
+                        )}
+                      </div>
+                    }
+                  >
+                    <div className="cursor-help">
+                      <SaleStatusBadge saleStatus={product.saleStatus} />
+                    </div>
+                  </Tooltip>
+                )}
+              </TableCell>
               <TableCell>${product.price.buy}</TableCell>
               <TableCell>${product.price.minimun}</TableCell>
               <TableCell>${product.price.sale}</TableCell>
               <TableCell>${product.price.soldOn}</TableCell>
-              <TableCell>{parseDate(product.createdOn)}</TableCell>
+              <TableCell>{parseDate(product.timeline?.publishedAt || product.createdAt)}</TableCell>
               <TableCell>
-                <Button onClick={() => handleClickEdit(product)}>
-                  <MdOutlineEdit className="text-mainDark-white" size={20} />
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="xs" onClick={() => handleView(product._id)}>
+                    <MdRemoveRedEye className="text-mainDark-white" size={18} />
+                  </Button>
+                  <Button size="xs" onClick={() => handleClickEdit(product)}>
+                    <MdOutlineEdit className="text-mainDark-white" size={18} />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}

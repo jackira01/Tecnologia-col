@@ -13,7 +13,7 @@ export const CustomCurrencyInput = (props) => {
 
   return (
     <CurrencyInput
-      className="bg-inherit text-white h-[42px] rounded-lg md:w-[175px] border-gray-600 "
+      className="bg-inherit text-gray-900 dark:text-white h-[42px] rounded-lg md:w-[175px] border-gray-600 "
       {...commonConfig}
       {...props}
     />

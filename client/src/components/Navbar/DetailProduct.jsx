@@ -36,16 +36,16 @@ const DetailProduct = () => {
   return (
     <section className="py-8 antialiased">
       <div className="max-w-screen-2xl px-4 mx-auto 2xl:px-0">
-        {/* Cambio principal aquí: estructura de grid más limpia */}
-        <div className="lg:grid lg:grid-cols-2 lg:grid-rows-2 lg:gap-8 xl:gap-10 w-full">
+        {/* Estructura de grid optimizada */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-10 w-full">
           {/* Columna izquierda (imágenes) */}
-          <div className="lg:row-start-1 ">
+          <div className="space-y-4">
             <CarouselComponent images={currentProduct.image_URL} />
 
             {/* WhatsApp */}
-            <div className="flex flex-col items-center mt-4">
+            <div className="flex flex-col items-center">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Escríbenos al WhatsApp al 312 619 3489
+                Escríbenos al WhatsApp al 323 724 2744
               </h2>
               <span>O</span>
               <Button
@@ -55,15 +55,15 @@ const DetailProduct = () => {
               >
                 <FaWhatsapp
                   size={30}
-                  className="text-green-600 dark:text-white"
+                  className="text-white"
                 />
-                <p className="text-semibold text-xl">Contactar por WhatsApp</p>
+                <p className="text-semibold text-xl text-white">Contactar por WhatsApp</p>
               </Button>
             </div>
           </div>
 
           {/* Columna derecha (contenido) */}
-          <div className="space-y-6 mt-6 lg:mt-0 lg:col-start-2 lg:row-start-1">
+          <div className="space-y-6 mt-6 lg:mt-0">
             {/* Sección de disponibilidad y nombre */}
             <div>
               {currentProduct?.disponibility === 'vendido' ? (
@@ -117,13 +117,20 @@ const DetailProduct = () => {
                 </li>
                 <li>
                   <span className="font-semibold">RAM:</span>{' '}
-                  {currentProduct?.specification.ram.ram_size}{' '}
+                  {currentProduct?.specification.ram.size}{' '}
                   {currentProduct?.specification.ram.ram_type}
                 </li>
                 <li>
                   <span className="font-semibold">Almacenamiento:</span>{' '}
-                  {currentProduct?.specification.storage.size}{' '}
-                  {currentProduct?.specification.storage.storage_type}
+                  {Array.isArray(currentProduct?.specification.storage) 
+                    ? currentProduct.specification.storage.map((s, i) => (
+                        <span key={i}>
+                          {s.size} {s.storage_type}
+                          {i < currentProduct.specification.storage.length - 1 ? ' + ' : ''}
+                        </span>
+                      ))
+                    : `${currentProduct?.specification.storage?.size} ${currentProduct?.specification.storage?.storage_type}`
+                  }
                 </li>
                 <li>
                   <span className="font-semibold">Procesador:</span>{' '}

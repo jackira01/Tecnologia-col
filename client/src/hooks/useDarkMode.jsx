@@ -3,17 +3,26 @@
 import { useEffect, useState } from 'react';
 
 const useDarkMode = () => {
-  const [theme, setTheme] = useState('light');
+  // Inicializar siempre con 'dark' para evitar errores de hidratación
+  // El valor real se establecerá en el useEffect
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     const root = window.document.documentElement;
     const storedTheme = localStorage.getItem('theme');
+    
     if (storedTheme) {
-      root.classList.add(storedTheme);
+      if (storedTheme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
       setTheme(storedTheme);
     } else {
-      const initialTheme = root.classList.contains('dark') ? 'dark' : 'light';
-      setTheme(initialTheme);
+      // Si no hay tema guardado, usar 'dark' por defecto
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setTheme('dark');
     }
   }, []);
 

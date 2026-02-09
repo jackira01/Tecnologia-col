@@ -6,6 +6,12 @@ import morgan from 'morgan';
 import { laptopProductRouter } from './routes/laptopProductRouter.js';
 import { salesRouter } from './routes/sales/salesRouter.js';
 import { userRouter } from './routes/userRouter.js';
+import { attributeRouter } from './routes/attributeRouter.js';
+import { insightsRouter } from './routes/insightsRouter.js';
+import { loanRouter } from './routes/loanRouter.js';
+import { expenseRouter } from './routes/expenseRouter.js';
+
+
 
 const { PORT, ORIGIN_ALLOWED, MONGODB_URI, ENVIROMENT } = process.env;
 
@@ -40,6 +46,12 @@ server.use(express.json());
 server.use('/laptop-product', laptopProductRouter);
 server.use('/user', userRouter);
 server.use('/sales', salesRouter);
+server.use('/attributes', attributeRouter);
+server.use('/insights', insightsRouter);
+server.use('/loan', loanRouter);
+server.use('/expense', expenseRouter);
+
+
 server.use('/welcome', (req, res) => {
   res.status(200).json({
     message: 'Welcome to the API',

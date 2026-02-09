@@ -26,6 +26,32 @@ export const CreateProductSchema = Yup.object().shape({
     .max(50, 'Muy largo!'),
 
   description: Yup.string().min(2, 'Muy corto!').max(800, 'Muy largo!'),
+
+  // Validación condicional: Si está vendido, requiere fecha de venta
+  timeline_soldAt: Yup.string().test(
+    'required-if-sold',
+    'La fecha de venta es obligatoria para productos vendidos',
+    function (value) {
+      const { disponibility } = this.parent;
+      if (disponibility === 'vendido') {
+        return !!value; // Debe tener un valor
+      }
+      return true; // Si no está vendido, no es obligatorio
+    }
+  ),
+
+  // Validación condicional: Si está vendido, requiere precio de venta > 0
+  price_soldOn: Yup.number().test(
+    'required-if-sold',
+    'El precio de venta debe ser mayor a $0 para productos vendidos',
+    function (value) {
+      const { disponibility } = this.parent;
+      if (disponibility === 'vendido') {
+        return value > 0; // Debe ser mayor a 0
+      }
+      return true; // Si no está vendido, no es obligatorio
+    }
+  ),
 });
 
 export const CreateUserSchema = Yup.object().shape({

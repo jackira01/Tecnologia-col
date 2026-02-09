@@ -5,17 +5,24 @@ import { ProductPagination } from '@/components/Pagination/ProductPagination';
 import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Spinner } from 'flowbite-react';
-import { useContext, useEffect } from 'react';
+import { Button, Spinner, Badge } from 'flowbite-react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { IoAddCircleOutline } from 'react-icons/io5';
+import { HiExclamation } from 'react-icons/hi';
 import DashbProductList from './ProductList';
+import { DashboardFilterBar } from './DashboardFilterBar';
+import { buildDashboardFilterQuery, getDefaultDashboardFilters } from '@/utils/filterUtils';
 
 const ProductsTab = () => {
   const {
-    currentPage, // Asume que tienes currentPage en el contexto
+    currentPage,
     setTotalPages,
     setOpenModal,
   } = useContext(ProductContext);
+
+  // Todos los hooks deben estar al inicio, antes de cualquier return condicional
+  const [filterMode, setFilterMode] = useState('all');
+  const [dashboardFilters, setDashboardFilters] = useState(getDefaultDashboardFilters());
 
   // Configuración de la query con cache inteligente
   const {
@@ -24,28 +31,54 @@ const ProductsTab = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ['tableProduct', currentPage], // Se invalida solo cuando cambia la página
+    queryKey: ['tableProduct', currentPage, dashboardFilters],
     queryFn: () =>
       getProducts({
         page: currentPage,
         limit: 8,
-        filters: {},
+        filters: buildDashboardFilterQuery(dashboardFilters),
       }),
-    refetchOnMount: false, // No refetch al montar si hay datos en cache
+    refetchOnMount: false,
   });
 
-  // Manejo de autenticación
+  const products = productsData?.docs || [];
+
+  // Filtrar productos según el modo seleccionado
+  const filteredProducts = useMemo(() => {
+    if (filterMode === 'needs_price_change') {
+      return products.filter((p) =>
+        ['quick_sale', 'recovery', 'critical'].includes(p.saleStatus?.status)
+      );
+    }
+    return products;
+  }, [products, filterMode]);
+
+  // Contador de productos que necesitan cambio de precio
+  const needsPriceChangeCount = useMemo(() => {
+    return products.filter((p) =>
+      ['quick_sale', 'recovery', 'critical'].includes(p.saleStatus?.status)
+    ).length;
+  }, [products]);
+
+  // Manejo de paginación
   useEffect(() => {
     if (productsData) {
-      setTotalPages(productsData.totalPages || 1); // Asegura que totalPages sea al menos 1
+      setTotalPages(productsData.totalPages || 1);
     }
-    // Cleanup solo al desmontar completamente
     return () => {
       setTotalPages(1);
     };
   }, [productsData, setTotalPages]);
 
-  // Loading state durante autenticación
+  const handleFilterChange = (newFilters) => {
+    setDashboardFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setDashboardFilters(getDefaultDashboardFilters());
+  };
+
+  // Ahora sí, los returns condicionales después de todos los hooks
   if (isLoading) {
     return (
       <div className="flex justify-center p-4">
@@ -54,7 +87,6 @@ const ProductsTab = () => {
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="p-4 text-red-600">
@@ -63,26 +95,53 @@ const ProductsTab = () => {
     );
   }
 
-  const products = productsData?.docs || [];
-
   if (!products.length) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No hay productos disponibles
+      <div className="overflow-x-auto">
+        <div className="p-4 text-center text-gray-500">
+          No hay productos disponibles
+        </div>
+        <ModalComponent />
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto">
-      <div className="flex gap-2">
-        <Button onClick={() => setOpenModal(true)}>
-          <IoAddCircleOutline size={20} className="mx-2" />
-          Crear Producto
+      {/* Dashboard Filters */}
+      <DashboardFilterBar
+        filters={dashboardFilters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        products={products}
+      />
+
+      {/* Existing Filters */}
+      <div className="flex gap-3 mb-4 items-center">
+        <Button
+          color={filterMode === 'all' ? 'blue' : 'gray'}
+          onClick={() => setFilterMode('all')}
+          size="sm"
+        >
+          Todos los Productos
+        </Button>
+        
+        <Button
+          color={filterMode === 'needs_price_change' ? 'warning' : 'gray'}
+          onClick={() => setFilterMode('needs_price_change')}
+          size="sm"
+        >
+          <HiExclamation className="mr-2 h-4 w-4" />
+          Necesitan Cambio de Precio
+          {needsPriceChangeCount > 0 && (
+            <Badge color="warning" className="ml-2">
+              {needsPriceChangeCount}
+            </Badge>
+          )}
         </Button>
       </div>
 
-      <DashbProductList products={products} />
+      <DashbProductList products={filteredProducts} />
 
       <ProductPagination />
       <ModalComponent />
