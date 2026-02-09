@@ -3,13 +3,14 @@
 import { TabItem, Tabs, Button } from 'flowbite-react';
 import { useContext } from 'react';
 import { ProductContext } from '@/context/productContext';
-import { IoAddCircleOutline, IoAnalytics, IoSettings } from 'react-icons/io5';
+import { IoAddCircleOutline, IoAnalytics, IoSettings, IoPersonAdd } from 'react-icons/io5';
 import { FaClipboardList } from 'react-icons/fa';
 import { MdAttachMoney } from 'react-icons/md';
 import { AnalyticsTab } from './TabsComponent/analitycs/AnalyticsTab';
 import ProductsTab from './TabsComponent/products/ProductsTab';
 import AttributesTab from './TabsComponent/attributes/AttributesTab';
 import FinanzasTab from './TabsComponent/finanzas/FinanzasTab';
+import LeadsTab from './TabsComponent/leads/LeadsTab';
 
 export const Dashboard = () => {
   const { setOpenModal } = useContext(ProductContext);
@@ -31,6 +32,9 @@ export const Dashboard = () => {
         </TabItem>
         <TabItem title="Finanzas" icon={MdAttachMoney}>
           <FinanzasTab />
+        </TabItem>
+        <TabItem title="Clientes CRM" icon={IoPersonAdd}>
+          <LeadsTab />
         </TabItem>
         <TabItem title="Configuración" icon={IoSettings}>
           <AttributesTab />
