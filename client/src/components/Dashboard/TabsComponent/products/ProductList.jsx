@@ -95,7 +95,7 @@ const DashbProductList = ({ products }) => {
                 </div>
               </TableCell>
               <TableCell>{product.active ? 'activo' : 'inactivo'}</TableCell>
-              <TableCell>{product.disponibility}</TableCell>
+              <TableCell>{product.disponibility || 'N/A'}</TableCell>
               <TableCell>
                 {product.saleStatus && product.disponibility !== 'vendido' && (
                   <Tooltip 
@@ -117,10 +117,10 @@ const DashbProductList = ({ products }) => {
                   </Tooltip>
                 )}
               </TableCell>
-              <TableCell>${product.price.buy}</TableCell>
-              <TableCell>${product.price.minimun}</TableCell>
-              <TableCell>${product.price.sale}</TableCell>
-              <TableCell>${product.price.soldOn}</TableCell>
+              <TableCell>${product.price?.buy || 0}</TableCell>
+              <TableCell>${product.price?.minimun || 0}</TableCell>
+              <TableCell>${product.price?.sale || 0}</TableCell>
+              <TableCell>${product.price?.soldOn || 0}</TableCell>
               <TableCell>{parseDate(product.timeline?.publishedAt || product.createdAt)}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
