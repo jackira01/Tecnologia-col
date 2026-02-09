@@ -7,19 +7,21 @@ import { useContext } from 'react';
 import { FormComponent } from './FormComponent';
 
 export const ModalComponent = () => {
-  const { setCurrentProduct, openModal, setOpenModal } =
+  const { setCurrentProduct, openModal, setOpenModal, isEdit } =
     useContext(ProductContext);
   return (
     <Modal
       show={openModal}
-      size="md"
+      size="5xl"
       popup
       onClose={() => {
         setCurrentProduct(defaultValuesForm);
         setOpenModal(false);
       }}
     >
-      <ModalHeader />
+      <ModalHeader className="p-4">
+        {isEdit ? 'Editar Producto' : 'Creación de Producto'}
+      </ModalHeader>
       <ModalBody>
         <FormComponent />
       </ModalBody>

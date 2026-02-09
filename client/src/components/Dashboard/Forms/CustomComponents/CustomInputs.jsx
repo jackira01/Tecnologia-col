@@ -6,6 +6,7 @@ export const CurrencyField = ({
   valueForm,
   setFieldValue,
   labelName,
+  error_message,
 }) => (
   <div className="mb-2 block">
     <Label htmlFor={keyValue} className="text-base">
@@ -18,6 +19,11 @@ export const CurrencyField = ({
       }}
       value={valueForm}
     />
+    {error_message && (
+      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+        {error_message}
+      </p>
+    )}
   </div>
 );
 
@@ -27,12 +33,16 @@ export const TextInputField = ({
   setFieldValue,
   labelName,
   error_message,
+  type = 'text',
 }) => (
   <div className="mb-2 block">
+    <Label htmlFor={keyValue} className="text-base">
+      {labelName}
+    </Label>
     <TextInput
-      id={labelName}
+      id={keyValue}
       placeholder={labelName}
-      type="text"
+      type={type}
       name={keyValue}
       onChange={(e) => setFieldValue(keyValue, e.target.value)}
       value={valueForm}

@@ -35,6 +35,24 @@ const LaptopProductSchema = new Schema(
         require: true,
         default: 0,
       },
+      otherExpenses: {
+        type: Number,
+        default: 0,
+      },
+    },
+    metrics: {
+      fbViews: {
+        type: Number,
+        default: 0,
+      },
+      fbMessages: {
+        type: Number,
+        default: 0,
+      },
+    },
+    timeline: {
+      publishedAt: Date,
+      soldAt: Date,
     },
     image_URL: [String],
     specification: {
@@ -59,12 +77,16 @@ const LaptopProductSchema = new Schema(
         size: STRING_TYPE_REQUIRE,
         ram_type: STRING_TYPE_REQUIRE,
       },
-      storage: {
-        size: STRING_TYPE_REQUIRE,
-        storage_type: STRING_TYPE_REQUIRE,
-      },
+      storage: [
+        {
+          size: STRING_TYPE_REQUIRE,
+          storage_type: STRING_TYPE_REQUIRE,
+        },
+      ],
       processor: {
         brand: STRING_TYPE_REQUIRE,
+        family: STRING_TYPE,
+        generation: STRING_TYPE,
         model: STRING_TYPE_REQUIRE,
       },
       general_description: STRING_TYPE,
