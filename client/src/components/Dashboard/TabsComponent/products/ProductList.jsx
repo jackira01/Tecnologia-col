@@ -93,9 +93,22 @@ const DashbProductList = ({ products }) => {
                 <div className="whitespace-nowrap overflow-hidden text-ellipsis font-medium text-gray-900 dark:text-white" title={product.name}>
                   {product.name}
                 </div>
+                {product.acquisitionType === 'co_investment' && product.price?.myInvestment > 0 && (
+                  <div className="mt-1">
+                    {(() => {
+                      const total = (product.price.buy || 0) + (product.price.otherExpenses || 0);
+                      const pct = total > 0 ? Math.round((product.price.myInvestment / total) * 100) : 0;
+                      return (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                          Co-inv: {pct}%
+                        </span>
+                      );
+                    })()}
+                  </div>
+                )}
               </TableCell>
               <TableCell>{product.active ? 'activo' : 'inactivo'}</TableCell>
-              <TableCell>{product.disponibility}</TableCell>
+              <TableCell>{product.disponibility || 'N/A'}</TableCell>
               <TableCell>
                 {product.saleStatus && product.disponibility !== 'vendido' && (
                   <Tooltip 
@@ -117,10 +130,10 @@ const DashbProductList = ({ products }) => {
                   </Tooltip>
                 )}
               </TableCell>
-              <TableCell>${product.price.buy}</TableCell>
-              <TableCell>${product.price.minimun}</TableCell>
-              <TableCell>${product.price.sale}</TableCell>
-              <TableCell>${product.price.soldOn}</TableCell>
+              <TableCell>${product.price?.buy || 0}</TableCell>
+              <TableCell>${product.price?.minimun || 0}</TableCell>
+              <TableCell>${product.price?.sale || 0}</TableCell>
+              <TableCell>${product.price?.soldOn || 0}</TableCell>
               <TableCell>{parseDate(product.timeline?.publishedAt || product.createdAt)}</TableCell>
               <TableCell>
                 <div className="flex gap-2">

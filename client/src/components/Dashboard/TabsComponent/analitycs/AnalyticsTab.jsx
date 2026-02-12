@@ -1,4 +1,5 @@
 import { getSalesSummary } from '@/services/products';
+import { getCapitalTransactions, createCapitalTransaction } from '@/services/capital';
 import { formatPrice } from '@/utils';
 import { diffDays } from '@formkit/tempo';
 import {
@@ -14,7 +15,9 @@ import {
   BadgeDelta,
   ProgressBar,
 } from '@tremor/react';
+import { Button, Modal, ModalHeader, ModalBody, Label, TextInput, Select, Textarea } from 'flowbite-react';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export const AnalyticsTab = () => {
   const [loading, setLoading] = useState(true);
@@ -23,6 +26,9 @@ export const AnalyticsTab = () => {
     avgSalesSpeed: 0,
     roi: 0,
     marketplaceEfficiency: 0,
+    inventoryValue: 0,
+    liquidCapital: 0,
+    totalPatrimony: 0,
   });
   const [charts, setCharts] = useState({
     barData: [],
@@ -31,29 +37,51 @@ export const AnalyticsTab = () => {
     velocityScores: [],
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const products = await getSalesSummary();
-        if (products && Array.isArray(products)) {
-          calculateMetrics(products);
-        }
-      } catch (error) {
-        console.error('Error calculating metrics:', error);
-      } finally {
-        setLoading(false);
+  // Capital Adjustment State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [adjustmentForm, setAdjustmentForm] = useState({
+    type: 'INJECTION',
+    amount: '',
+    description: '',
+  });
+
+  const fetchData = async () => {
+    try {
+      const [products, capitalData] = await Promise.all([
+        getSalesSummary(),
+        getCapitalTransactions(),
+      ]);
+
+      if (products && Array.isArray(products)) {
+        calculateMetrics(products, capitalData?.totalCapital || 0);
       }
-    };
+    } catch (error) {
+      console.error('Error calculating metrics:', error);
+      toast.error('Error al cargar datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
-  const calculateMetrics = (products) => {
+  const calculateMetrics = (products, liquidCapital) => {
     const soldProducts = products.filter(
       (p) =>
         p.disponibility === 'vendido' &&
         p.price?.soldOn > 0 &&
         p.timeline?.soldAt
     );
+
+    const availableProducts = products.filter(
+        (p) => p.disponibility === 'disponible'
+    );
+
+    // Calculate Inventory Value (Patrimonio en Productos)
+    const inventoryValue = availableProducts.reduce((sum, p) => sum + (p.price?.buy || 0), 0);
+    const totalPatrimony = inventoryValue + liquidCapital;
 
     // 1. KPI: Utilidad Total Neta
     let totalRevenue = 0;
@@ -91,7 +119,6 @@ export const AnalyticsTab = () => {
       if (p.timeline?.publishedAt && p.timeline?.soldAt) {
         // Usar Math.abs() porque las fechas pueden estar en orden incorrecto
         const days = Math.abs(diffDays(p.timeline.publishedAt, p.timeline.soldAt));
-        console.log('Product:', p.name, 'Published:', p.timeline.publishedAt, 'Sold:', p.timeline.soldAt, 'Days:', days);
         if (days >= 0) {
           totalDays += days;
           validSpeedCount++;
@@ -99,7 +126,6 @@ export const AnalyticsTab = () => {
       }
     });
 
-    console.log('Total Days:', totalDays, 'Valid Count:', validSpeedCount);
     const avgSalesSpeed =
       validSpeedCount > 0 ? Math.round(totalDays / validSpeedCount) : 0;
 
@@ -141,17 +167,12 @@ export const AnalyticsTab = () => {
       }));
 
     // DonutChart: Distribución por Marca (Available Inventory)
-    const availableProducts = products.filter(
-      (p) => p.disponibility === 'disponible'
-    );
     const brandMap = {};
     availableProducts.forEach((p) => {
       const brand = p.specification?.brand || 'Sin Marca';
-      console.log('Product:', p.name, 'Brand:', brand, 'Full spec:', p.specification);
       brandMap[brand] = (brandMap[brand] || 0) + 1;
     });
 
-    console.log('Brand Map:', brandMap);
     const donutData = Object.keys(brandMap).map((brand) => ({
       name: brand,
       value: brandMap[brand],
@@ -187,6 +208,9 @@ export const AnalyticsTab = () => {
       avgSalesSpeed,
       roi,
       marketplaceEfficiency: efficiency,
+      inventoryValue,
+      liquidCapital,
+      totalPatrimony,
     });
 
     setCharts({
@@ -197,12 +221,61 @@ export const AnalyticsTab = () => {
     });
   };
 
+  const handleCreateTransaction = async (e) => {
+    e.preventDefault();
+    try {
+        if (!adjustmentForm.amount || !adjustmentForm.description) {
+            toast.error('Completa todos los campos');
+            return;
+        }
+
+        await createCapitalTransaction({
+            ...adjustmentForm,
+            amount: Number(adjustmentForm.amount)
+        });
+        
+        toast.success('Transacción registrada');
+        setIsModalOpen(false);
+        setAdjustmentForm({ type: 'INJECTION', amount: '', description: '' });
+        fetchData(); // Refresh data
+    } catch (error) {
+        console.error(error);
+        toast.error('Error al registrar transacción');
+    }
+  };
+
   if (loading) return <div className="p-10 text-center">Cargando estadísticas...</div>;
 
   return (
     <main className="p-4 space-y-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
-      <Title>Tablero de Control de Inventario</Title>
-      <Text>Métricas clave de rendimiento y estado del inventario.</Text>
+      <div className="flex justify-between items-center">
+        <div>
+            <Title>Tablero de Control de Inventario</Title>
+            <Text>Métricas clave de rendimiento y estado del inventario.</Text>
+        </div>
+        <Button size="sm" color="dark" onClick={() => setIsModalOpen(true)}>
+            Ajustar Capital
+        </Button>
+      </div>
+
+      {/* Patrimonio Card (Highlight) */}
+      <Card decoration="top" decorationColor="indigo">
+        <Flex alignItems="start">
+          <div>
+            <Text>Patrimonio Total Estimado</Text>
+            <Metric>{formatPrice(kpis.totalPatrimony)}</Metric>
+          </div>
+          <div className="text-right">
+             <Text>Inventario: <b>{formatPrice(kpis.inventoryValue)}</b></Text>
+             <Text>Capital Líquido: <b>{formatPrice(kpis.liquidCapital)}</b></Text>
+          </div>
+        </Flex>
+        <ProgressBar value={(kpis.inventoryValue / (kpis.totalPatrimony || 1)) * 100} color="indigo" className="mt-4" />
+        <Flex className="mt-2">
+            <Text>{Math.round((kpis.inventoryValue / (kpis.totalPatrimony || 1)) * 100)}% Inventario</Text>
+            <Text>{Math.round((kpis.liquidCapital / (kpis.totalPatrimony || 1)) * 100)}% Capital</Text>
+        </Flex>
+      </Card>
 
       {/* KPI Cards */}
       <Grid numItems={1} numItemsSm={2} numItemsLg={4} className="gap-6">
@@ -301,6 +374,59 @@ export const AnalyticsTab = () => {
           </div>
         </Card>
       </Grid>
+
+      {/* Capital Adjustment Modal */}
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalHeader>Registrar Movimiento de Capital</ModalHeader>
+        <ModalBody>
+            <form onSubmit={handleCreateTransaction} className="space-y-4">
+                <div>
+                    <div className="mb-2 block">
+                        <Label htmlFor="type" value="Tipo de Movimiento" />
+                    </div>
+                    <Select 
+                        id="type" 
+                        required 
+                        value={adjustmentForm.type}
+                        onChange={(e) => setAdjustmentForm({...adjustmentForm, type: e.target.value})}
+                    >
+                        <option value="INJECTION">Inyección de Capital (Sumar)</option>
+                        <option value="WITHDRAWAL">Retiro/Gasto (Restar)</option>
+                    </Select>
+                </div>
+                <div>
+                    <div className="mb-2 block">
+                        <Label htmlFor="amount" value="Monto (COP)" />
+                    </div>
+                    <TextInput 
+                        id="amount" 
+                        type="number" 
+                        placeholder="0" 
+                        required 
+                        value={adjustmentForm.amount}
+                        onChange={(e) => setAdjustmentForm({...adjustmentForm, amount: e.target.value})}
+                    />
+                </div>
+                <div>
+                    <div className="mb-2 block">
+                        <Label htmlFor="description" value="Descripción / Motivo" />
+                    </div>
+                    <Textarea 
+                        id="description" 
+                        placeholder="Ej: Inversión inicial, Retiro de utilidades..." 
+                        required 
+                        rows={3} 
+                        value={adjustmentForm.description}
+                        onChange={(e) => setAdjustmentForm({...adjustmentForm, description: e.target.value})}
+                    />
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                    <Button color="gray" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+                    <Button type="submit" color="blue">Registrar</Button>
+                </div>
+            </form>
+        </ModalBody>
+      </Modal>
     </main>
   );
 };

@@ -1,293 +1,200 @@
-'use client';
-
-import { Modal, ModalHeader, ModalBody, Button, Label, Select, TextInput, Spinner } from 'flowbite-react';
+import { Modal, ModalHeader, ModalBody, Button, Label, TextInput, Spinner, Select } from 'flowbite-react';
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createAttribute, updateAttribute } from '@/services/attributes';
-import toast from 'react-hot-toast';
+import { addValueToCategory, updateValueInCategory } from '@/services/attributes';
 
-const AttributeModal = ({ open, onClose, attribute, isEdit }) => {
+const AttributeModal = ({ open, onClose, category, defaultList, existingData, editingItem, initialParent }) => {
   const queryClient = useQueryClient();
-  
-  const [formData, setFormData] = useState({
-    category: 'processors',
-    value: '',
-    active: true,
-    metadata: {
-      brand: '',
-      family: '',
-      generation: '',
-      size: '',
-      type: '',
-      capacity: '',
-      storageType: '',
-    },
-  });
+  const [listKey, setListKey] = useState(defaultList || '');
+  const [customListKey, setCustomListKey] = useState('');
+  const [value, setValue] = useState('');
+  const [selectedParent, setSelectedParent] = useState('');
 
-  // Cargar datos del atributo al editar
   useEffect(() => {
-    if (attribute && isEdit) {
-      setFormData({
-        category: attribute.category || 'processors',
-        value: attribute.value || '',
-        active: attribute.active !== undefined ? attribute.active : true,
-        metadata: {
-          brand: attribute.metadata?.brand || '',
-          family: attribute.metadata?.family || '',
-          generation: attribute.metadata?.generation || '',
-          size: attribute.metadata?.size || '',
-          type: attribute.metadata?.type || '',
-          capacity: attribute.metadata?.capacity || '',
-          storageType: attribute.metadata?.storageType || '',
-        },
-      });
-    } else {
-      // Reset al crear nuevo
-      setFormData({
-        category: 'processors',
-        value: '',
-        active: true,
-        metadata: {
-          brand: '',
-          family: '',
-          generation: '',
-          size: '',
-          type: '',
-          capacity: '',
-          storageType: '',
-        },
-      });
+    if (open) {
+      if (editingItem) {
+        setListKey(editingItem.key);
+        setValue(editingItem.value || '');
+        setSelectedParent(editingItem.parent || '');
+        setCustomListKey('');
+      } else {
+        setListKey(defaultList || '');
+        setCustomListKey('');
+        setValue('');
+        setSelectedParent(initialParent || ''); // Use initialParent if provided
+      }
     }
-  }, [attribute, isEdit, open]);
+  }, [open, defaultList, editingItem, initialParent]);
 
-  const { mutate: createMutation, isLoading: isCreating } = useMutation({
-    mutationFn: createAttribute,
+  // Configuration (Duplicated from List for now, could be shared constant)
+  const categoryConfig = {
+    processors: [
+      { key: 'brands', label: 'Marcas' },
+      { key: 'families', label: 'Familias', parentKey: 'brands' },
+      { key: 'generations', label: 'Generaciones', parentKey: 'families' },
+    ],
+    ram: [
+      { key: 'types', label: 'Tipos' },
+      { key: 'sizes', label: 'Capacidades' },
+    ],
+    storage: [
+      { key: 'types', label: 'Tipos' },
+      { key: 'capacities', label: 'Capacidades' },
+    ],
+    so: [
+      { key: 'versions', label: 'Versiones' },
+    ],
+    brands: [
+      { key: 'names', label: 'Nombres' },
+    ],
+  };
+
+  const config = categoryConfig[category] || [];
+  const currentConfig = config.find(c => c.key === listKey);
+  const listLabel = currentConfig?.label || (listKey === 'custom_new' ? 'Nueva Lista' : listKey);
+
+  // Get hierarchy config
+  const parentKey = currentConfig?.parentKey;
+  const parentList = parentKey && existingData[parentKey] ? existingData[parentKey] : [];
+  
+
+
+  const { mutate: addMutation, isLoading: isAdding } = useMutation({
+    mutationFn: addValueToCategory,
     onSuccess: () => {
-      queryClient.invalidateQueries(['attributes']);
-      toast.success('Atributo creado exitosamente');
+      queryClient.invalidateQueries(['attributes', category]);
       onClose();
     },
   });
 
   const { mutate: updateMutation, isLoading: isUpdating } = useMutation({
-    mutationFn: updateAttribute,
+    mutationFn: updateValueInCategory,
     onSuccess: () => {
-      queryClient.invalidateQueries(['attributes']);
-      toast.success('Atributo actualizado exitosamente');
+      queryClient.invalidateQueries(['attributes', category]);
       onClose();
     },
   });
 
+  const isLoading = isAdding || isUpdating;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Limpiar metadata vacía
-    const cleanMetadata = {};
-    Object.entries(formData.metadata).forEach(([key, value]) => {
-      if (value && value.trim() !== '') {
-        cleanMetadata[key] = value.trim();
-      }
-    });
+    const finalKey = listKey === 'custom_new' ? customListKey.trim() : listKey;
 
-    const payload = {
-      category: formData.category,
-      value: formData.value.trim(),
-      active: formData.active,
-      metadata: cleanMetadata,
+    if (!value.trim() || !finalKey) return;
+    
+    // Construct payload
+    let payload = {
+      category,
+      key: finalKey,
     };
 
-    if (isEdit && attribute) {
-      updateMutation({ ...payload, _id: attribute._id });
+    const finalValue = (parentKey && selectedParent) ? { value: value.trim(), parent: selectedParent } : value.trim();
+
+    if (editingItem) {
+        // Prepare Update Payload
+        payload = {
+            ...payload,
+            oldValue: editingItem.value, // This is current value before edit
+            newValue: value.trim(),
+            newParent: (parentKey && selectedParent) ? selectedParent : undefined
+        };
+        updateMutation(payload);
     } else {
-      createMutation(payload);
+        // Prepare Add Payload
+        payload.value = finalValue;
+        addMutation(payload);
     }
   };
-
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleMetadataChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      metadata: {
-        ...prev.metadata,
-        [field]: value,
-      },
-    }));
-  };
-
-  const renderMetadataFields = () => {
-    switch (formData.category) {
-      case 'processors':
-        return (
-          <>
-            <div>
-              <Label htmlFor="brand" value="Marca (Intel, AMD, etc.)" />
-              <TextInput
-                id="brand"
-                value={formData.metadata.brand}
-                onChange={(e) => handleMetadataChange('brand', e.target.value)}
-                placeholder="Intel"
-              />
-            </div>
-            <div>
-              <Label htmlFor="family" value="Familia (Core i5, Ryzen 5, etc.)" />
-              <TextInput
-                id="family"
-                value={formData.metadata.family}
-                onChange={(e) => handleMetadataChange('family', e.target.value)}
-                placeholder="Core i5"
-              />
-            </div>
-            <div>
-              <Label htmlFor="generation" value="Generación (10th Gen, 11th Gen, etc.)" />
-              <TextInput
-                id="generation"
-                value={formData.metadata.generation}
-                onChange={(e) => handleMetadataChange('generation', e.target.value)}
-                placeholder="11th Gen"
-              />
-            </div>
-          </>
-        );
-      
-      case 'ram':
-        return (
-          <>
-            <div>
-              <Label htmlFor="size" value="Tamaño (4GB, 8GB, etc.)" />
-              <TextInput
-                id="size"
-                value={formData.metadata.size}
-                onChange={(e) => handleMetadataChange('size', e.target.value)}
-                placeholder="8GB"
-              />
-            </div>
-            <div>
-              <Label htmlFor="type" value="Tipo (DDR3, DDR4, etc.)" />
-              <TextInput
-                id="type"
-                value={formData.metadata.type}
-                onChange={(e) => handleMetadataChange('type', e.target.value)}
-                placeholder="DDR4"
-              />
-            </div>
-          </>
-        );
-      
-      case 'storage':
-        return (
-          <>
-            <div>
-              <Label htmlFor="capacity" value="Capacidad (256GB, 512GB, etc.)" />
-              <TextInput
-                id="capacity"
-                value={formData.metadata.capacity}
-                onChange={(e) => handleMetadataChange('capacity', e.target.value)}
-                placeholder="512GB"
-              />
-            </div>
-            <div>
-              <Label htmlFor="storageType" value="Tipo (SSD, HDD, etc.)" />
-              <TextInput
-                id="storageType"
-                value={formData.metadata.storageType}
-                onChange={(e) => handleMetadataChange('storageType', e.target.value)}
-                placeholder="SSD"
-              />
-            </div>
-          </>
-        );
-      
-      default:
-        return null;
-    }
-  };
-
-  const isLoading = isCreating || isUpdating;
 
   return (
-    <Modal show={open} onClose={onClose} size="lg">
+    <Modal show={open} onClose={onClose} size="md">
       <ModalHeader>
-        {isEdit ? 'Editar Atributo' : 'Crear Nuevo Atributo'}
+        {editingItem ? 'Editar' : 'Agregar a'} {category === 'brands' ? 'Marcas' : listLabel}
       </ModalHeader>
       <ModalBody>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Categoría */}
-          <div>
-            <Label htmlFor="category" value="Categoría *" />
-            <Select
-              id="category"
-              value={formData.category}
-              onChange={(e) => handleChange('category', e.target.value)}
-              required
-            >
-              <option value="processors">Procesadores</option>
-              <option value="ram">Memoria RAM</option>
-              <option value="storage">Almacenamiento</option>
-              <option value="so">Sistemas Operativos</option>
-              <option value="brands">Marcas</option>
-            </Select>
-          </div>
-
-          {/* Valor */}
-          <div>
-            <Label htmlFor="value" value="Valor *" />
-            <TextInput
-              id="value"
-              value={formData.value}
-              onChange={(e) => handleChange('value', e.target.value)}
-              placeholder="Ej: Intel Core i5 11th Gen"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Este es el valor principal que se mostrará en los selectores
-            </p>
-          </div>
-
-          {/* Metadata según categoría */}
-          {renderMetadataFields() && (
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
-                Información Adicional (Opcional)
-              </h3>
-              <div className="space-y-3">
-                {renderMetadataFields()}
-              </div>
+          
+          {/* Selector de lista (si no se pasó por defecto o se quiere cambiar) */}
+          {!defaultList && (
+            <div>
+              <Label htmlFor="listSelect" value="Seleccionar Lista" />
+              <Select
+                id="listSelect"
+                value={listKey === 'custom_new' ? 'custom_new' : listKey}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'custom_new') {
+                    setListKey('custom_new');
+                  } else {
+                    setListKey(val);
+                  }
+                }}
+                required
+              >
+                <option value="">Seleccione...</option>
+                {config.map(c => (
+                  <option key={c.key} value={c.key}>{c.label}</option>
+                ))}
+                 <option value="custom_new">+ Nueva Lista (Personalizada)</option>
+              </Select>
             </div>
           )}
 
-          {/* Estado */}
+          {listKey === 'custom_new' && (
+            <div>
+              <Label htmlFor="customKey" value="Nombre de la Nueva Lista (Clave)" />
+              <TextInput
+                id="customKey"
+                placeholder="Ej: socket, cache_size"
+                onChange={(e) => setCustomListKey(e.target.value)}
+                value={customListKey}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Esto creará una nueva lista de variantes en esta categoría.
+              </p>
+            </div>
+          )}
+
           <div>
-            <Label htmlFor="active" value="Estado" />
-            <Select
-              id="active"
-              value={formData.active.toString()}
-              onChange={(e) => handleChange('active', e.target.value === 'true')}
-            >
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </Select>
+            <Label htmlFor="value" value={`Nuevo Valor para ${listKey === 'custom_new' ? (customListKey || 'Nueva Lista') : listLabel}`} />
+            <TextInput
+              id="value"
+              placeholder={`Ej: ${category === 'processors' && listKey === 'brands' ? 'Intel' : 'Valor...'}`}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              required
+              autoFocus
+            />
           </div>
 
-          {/* Botones */}
-          <div className="flex gap-3 justify-end pt-4">
+          {/* Selector de Padre (si aplica jerarquía) */}
+          {parentKey && parentList.length > 0 && (
+            <div>
+              <Label htmlFor="parentSelect" value={`Seleccionar ${parentKey === 'brands' ? 'Marca' : 'Padre'}`} />
+              <Select
+                id="parentSelect"
+                value={selectedParent}
+                onChange={(e) => setSelectedParent(e.target.value)}
+                required
+              >
+                <option value="">Seleccione...</option>
+                {parentList.map((p, idx) => {
+                  // Handle if parent is object or string
+                  const val = typeof p === 'string' ? p : p.value;
+                  return <option key={idx} value={val}>{val}</option>;
+                })}
+              </Select>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 mt-4">
             <Button color="gray" onClick={onClose} disabled={isLoading}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Spinner size="sm" className="mr-2" />
-                  {isEdit ? 'Actualizando...' : 'Creando...'}
-                </>
-              ) : (
-                <>{isEdit ? 'Actualizar' : 'Crear'}</>
-              )}
+            <Button type="submit" disabled={isLoading || !listKey || !value.trim()}>
+              {isLoading ? <Spinner size="sm" /> : (editingItem ? 'Actualizar' : 'Agregar')}
             </Button>
           </div>
         </form>

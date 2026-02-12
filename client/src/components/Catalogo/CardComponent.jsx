@@ -11,9 +11,25 @@ import { RiRam2Line } from 'react-icons/ri';
 export const CardComponent = ({ data }) => {
   const { setCurrentProduct } = useContext(ProductContext);
 
+  // Validar que data existe y tiene las propiedades necesarias
+  if (!data) {
+    return null;
+  }
+
   const handleClickDetails = async () => {
     await setCurrentProduct(data);
   };
+
+  // Valores por defecto seguros
+  const imageUrl = data.image_URL?.[0] || '/placeholder-laptop.svg';
+  const productName = data.name || 'Producto sin nombre';
+  const disponibility = data.disponibility || 'disponible';
+  const condition = data.specification?.condition || 'usado';
+  const salePrice = data.price?.sale || 0;
+  const ramSize = data.specification?.ram?.size || 'N/A';
+  const ramType = data.specification?.ram?.ram_type || '';
+  const processorBrand = data.specification?.processor?.brand || 'N/A';
+  const processorModel = data.specification?.processor?.model || '';
 
   const SpecItem = ({ icon, text }) => (
     <div className="flex items-center">
@@ -21,58 +37,60 @@ export const CardComponent = ({ data }) => {
       <span className="text-sm text-gray-700 dark:text-gray-300">{text}</span>
     </div>
   );
+
   return (
     <Card
       className="transition-colors duration-500 h-full w-full min-w-[250px] max-w-[300px] border-none text-mainLight-text dark:bg-mainDark-card dark:text-mainDark-text shadow-md"
-      /* imgSrc={data.image_URL[0]}
-      imgAlt={data.name} */
     >
       <Image
-        src={data.image_URL[0]}
-        alt={data.name}
+        src={imageUrl}
+        alt={productName}
         width={500}
         height={200}
         className="w-full h-[200px] object-cover rounded-t-lg"
+        onError={(e) => {
+          e.target.src = '/placeholder-laptop.svg';
+        }}
       />
       <div className="flex h-full flex-col justify-between gap-0">
         <>
-          {data.disponibility === 'vendido' ? (
+          {disponibility === 'vendido' ? (
             <span className="text-red-500 font-bold">Vendido</span>
           ) : (
             <span className="text-green-500 font-bold">Disponible</span>
           )}
           <br />
-          {data.specification.condition === 'nuevo' ? (
+          {condition === 'nuevo' ? (
             <span className="text-blue-500 font-bold">Nuevo</span>
           ) : (
             <span className="text-blue-500 font-bold">Usado</span>
           )}
           <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white ">
-            {data.name}
+            {productName}
           </h5>
           <p className="mb-3 font-bold text-gray-700 dark:text-gray-300">
-            {formatPrice(data.price.sale)}
+            {formatPrice(salePrice)}
           </p>
 
           {/* Tus especificaciones (iconos + texto) */}
           <div className="space-y-2">
             <SpecItem
               icon={<RiRam2Line />}
-              text={`RAM ${data.specification.ram.size} ${data.specification.ram.ram_type}`}
+              text={`RAM ${ramSize} ${ramType}`}
             />
             <SpecItem
               icon={<BsDeviceHdd />}
               text={
-                Array.isArray(data.specification.storage)
+                Array.isArray(data.specification?.storage)
                   ? data.specification.storage.map((s, i) => 
-                      `${s.size} ${s.storage_type}`
+                      `${s?.size || 'N/A'} ${s?.storage_type || ''}`
                     ).join(' + ')
-                  : `Almacenamiento ${data.specification.storage?.size} ${data.specification.storage?.storage_type}`
+                  : `Almacenamiento ${data.specification?.storage?.size || 'N/A'} ${data.specification?.storage?.storage_type || ''}`
               }
             />
             <SpecItem
               icon={<HiMiniCpuChip />}
-              text={`${data.specification.processor.brand} ${data.specification.processor.model}`}
+              text={`${processorBrand} ${processorModel}`}
             />
           </div>
         </>

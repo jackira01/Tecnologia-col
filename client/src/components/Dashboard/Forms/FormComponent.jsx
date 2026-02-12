@@ -11,7 +11,7 @@ import { defaultValuesForm, parseData } from '@/utils';
 
 import { uploadMultipleImages } from '@/Helpers/tools';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { Button, FileInput, Label, Select, Spinner, TextInput } from 'flowbite-react';
+import { Button, FileInput, Label, Select, Spinner, Textarea, TextInput } from 'flowbite-react';
 import { Form, Formik } from 'formik';
 import toast from 'react-hot-toast';
 import { CurrencyField, TextInputField } from './CustomComponents/CustomInputs';
@@ -27,35 +27,36 @@ export const FormComponent = () => {
   const queryClient = useQueryClient();
 
   // Queries para atributos dinámicos
-  const { data: soOptions = [], isLoading: loadingSO } = useQuery({
+  const { data: soDoc } = useQuery({
     queryKey: ['attributes', 'so'],
     queryFn: () => getAttributesByCategory('so'),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
   });
+  const soOptions = soDoc?.data?.versions || [];
 
-  const { data: ramOptions = [], isLoading: loadingRAM } = useQuery({
+  const { data: ramDoc } = useQuery({
     queryKey: ['attributes', 'ram'],
     queryFn: () => getAttributesByCategory('ram'),
-    staleTime: 1000 * 60 * 5,
   });
+  const ramData = ramDoc?.data || {};
 
-  const { data: storageOptions = [], isLoading: loadingStorage } = useQuery({
+  const { data: storageDoc } = useQuery({
     queryKey: ['attributes', 'storage'],
     queryFn: () => getAttributesByCategory('storage'),
-    staleTime: 1000 * 60 * 5,
   });
+  const storageData = storageDoc?.data || {};
 
-  const { data: processorOptions = [], isLoading: loadingProcessors } = useQuery({
+  const { data: processorDoc } = useQuery({
     queryKey: ['attributes', 'processors'],
     queryFn: () => getAttributesByCategory('processors'),
-    staleTime: 1000 * 60 * 5,
   });
+  const processorData = processorDoc?.data || {};
 
-  const { data: brandOptions = [], isLoading: loadingBrands } = useQuery({
+  const { data: brandDoc } = useQuery({
     queryKey: ['attributes', 'brands'],
     queryFn: () => getAttributesByCategory('brands'),
-    staleTime: 1000 * 60 * 5,
   });
+  const brandOptions = brandDoc?.data?.names || [];
 
 
   const {
@@ -204,6 +205,15 @@ export const FormComponent = () => {
           }
         }, [values.price_buy, values.price_otherExpenses]);
 
+        // Auto-cálculo de Mi Inversión
+        useEffect(() => {
+          if (values.acquisitionType === 'owned') {
+            const buy = parseFloat(values.price_buy) || 0;
+            const other = parseFloat(values.price_otherExpenses) || 0;
+            setFieldValue('price_myInvestment', buy + other);
+          }
+        }, [values.acquisitionType, values.price_buy, values.price_otherExpenses, setFieldValue]);
+
         return (
 
         <Form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-2" onSubmit={handleSubmit}>
@@ -228,17 +238,22 @@ export const FormComponent = () => {
           </div>
 
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
-            <TextInputField
-              keyValue={'description'}
-              valueForm={values.description}
-              setFieldValue={setFieldValue}
-              labelName={'Descripción'}
-              error_message={
-                errors.description && touched.description
-                  ? errors.description
-                  : ''
-              }
+            <div className="mb-2 block">
+              <Label htmlFor="description" className="text-base">Descripción</Label>
+            </div>
+            <Textarea
+              id="description"
+              name="description"
+              placeholder="Descripción del producto..."
+              rows={4}
+              onChange={(e) => setFieldValue('description', e.target.value)}
+              value={values.description}
             />
+            {errors.description && touched.description && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.description}
+              </p>
+            )}
           </div>
 
           {/* Sección: Estado y Disponibilidad */}
@@ -285,12 +300,55 @@ export const FormComponent = () => {
           </div>
 
           <div className="col-span-1">
-            <CurrencyField
-              keyValue={'price_buy'}
-              valueForm={values.price_buy}
-              setFieldValue={setFieldValue}
-              labelName={'Costo Adquisición'}
-            />
+            <div className="mb-2 block">
+              <Label htmlFor="acquisitionType" className="text-base">Tipo de Adquisición</Label>
+            </div>
+            <Select
+              id="acquisitionType"
+              name="acquisitionType"
+              onChange={(e) => setFieldValue('acquisitionType', e.target.value)}
+              value={values.acquisitionType}
+            >
+              <option value="owned">Propio (100%)</option>
+              <option value="co_investment">Co-inversión</option>
+              <option value="consignment">Consignación</option>
+            </Select>
+          </div>
+
+          <div className="col-span-1">
+            {values.acquisitionType === 'co_investment' ? (
+              <>
+                <CurrencyField
+                  keyValue={'price_myInvestment'}
+                  valueForm={values.price_myInvestment}
+                  setFieldValue={setFieldValue}
+                  labelName={'Mi Inversión Real'}
+                />
+                {(() => {
+                  const myInv = parseFloat(values.price_myInvestment) || 0;
+                  const buy = parseFloat(values.price_buy) || 0;
+                  const other = parseFloat(values.price_otherExpenses) || 0;
+                  const total = buy + other;
+                  
+                  if (total > 0 && myInv > 0) {
+                    const pct = Math.round((myInv / total) * 100);
+                    return (
+                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        Eres dueño del {pct}% de este equipo
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
+              </>
+            ) : (
+               <CurrencyField
+                keyValue={'price_buy'}
+                valueForm={values.price_buy}
+                setFieldValue={setFieldValue}
+                labelName={'Costo Adquisición'}
+              />
+            )}
           </div>
 
           <div className="col-span-1">
@@ -428,8 +486,8 @@ export const FormComponent = () => {
             </h2>
           </div>
 
-          {/* Condición y Sistema Operativo */}
-          <div className="col-span-1 md:col-span-2">
+          {/* Fila 1: Condición y Sistema Operativo */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <div className="mb-2 block">
               <Label htmlFor="condition" className="text-base">Condición</Label>
             </div>
@@ -444,7 +502,7 @@ export const FormComponent = () => {
             </Select>
           </div>
 
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <div className="mb-2 block">
               <Label htmlFor="so" className="text-base">Sistema Operativo</Label>
             </div>
@@ -453,37 +511,16 @@ export const FormComponent = () => {
               name="so"
               onChange={(e) => setFieldValue('so', e.target.value)}
               value={values.so}
-              disabled={loadingSO}
             >
               <option value="">Seleccionar...</option>
-              {loadingSO ? (
-                <option>Cargando...</option>
-              ) : (
-                soOptions.map((opt) => (
-                  <option key={opt._id} value={opt.value}>
-                    {opt.value}
-                  </option>
-                ))
-              )}
+              {soOptions.map((opt, idx) => (
+                <option key={idx} value={opt}>{opt}</option>
+              ))}
             </Select>
           </div>
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <TextInputField
-              keyValue={'screen_size'}
-              valueForm={values.screen_size}
-              setFieldValue={setFieldValue}
-              labelName={'Pantalla (Pulgadas)'}
-              error_message={
-                errors.screen_size && touched.screen_size
-                  ? errors.screen_size
-                  : ''
-              }
-            />
-          </div>
-
-          {/* Marca Portátil y Modelo */}
-          <div className="col-span-1 md:col-span-2">
+          {/* Fila 2: Marca y Modelo Portátil */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <div className="mb-2 block">
               <Label htmlFor="brand" className="text-base">Marca Portátil</Label>
             </div>
@@ -492,22 +529,15 @@ export const FormComponent = () => {
               name="brand"
               onChange={(e) => setFieldValue('brand', e.target.value)}
               value={values.brand}
-              disabled={loadingBrands}
             >
               <option value="">Seleccionar...</option>
-              {loadingBrands ? (
-                <option>Cargando...</option>
-              ) : (
-                brandOptions.map((opt) => (
-                  <option key={opt._id} value={opt.value}>
-                    {opt.value}
-                  </option>
-                ))
-              )}
+              {brandOptions.map((opt, idx) => (
+                <option key={idx} value={opt}>{opt}</option>
+              ))}
             </Select>
           </div>
 
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <TextInputField
               keyValue={'model'}
               valueForm={values.model}
@@ -516,178 +546,144 @@ export const FormComponent = () => {
             />
           </div>
 
-          {/* RAM - Agrupado */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+          {/* Fila 3: Pantalla y RAM */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
+             <TextInputField
+              keyValue={'screen_size'}
+              valueForm={values.screen_size}
+              setFieldValue={setFieldValue}
+              labelName={'Pantalla (Pulgadas)'}
+              error_message={errors.screen_size && touched.screen_size ? errors.screen_size : ''}
+            />
+          </div>
+
+           {/* RAM - Agrupado (Mitad de ancho) */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-2">
             <div className="mb-2 block">
               <Label className="text-base">Memoria RAM</Label>
             </div>
-            <div className="space-y-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg">
+            <div className="grid grid-cols-2 gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
               <div>
-                <Label htmlFor="ram_size" className="text-sm">Capacidad RAM</Label>
+                <Label htmlFor="ram_size" className="text-xs mb-1 block">Capacidad</Label>
                 <Select
                   id="ram_size"
                   name="ram_size"
                   onChange={(e) => setFieldValue('ram_size', e.target.value)}
                   value={values.ram_size}
-                  disabled={loadingRAM}
                   sizing="sm"
                 >
                   <option value="">Seleccionar...</option>
-                  {loadingRAM ? (
-                    <option>Cargando...</option>
-                  ) : (
-                    ramOptions
-                      .filter(opt => opt.metadata?.size)
-                      .reduce((unique, opt) => {
-                        if (!unique.find(u => u.metadata.size === opt.metadata.size)) {
-                          unique.push(opt);
-                        }
-                        return unique;
-                      }, [])
-                      .map((opt) => (
-                        <option key={opt._id} value={opt.metadata.size}>
-                          {opt.metadata.size}
-                        </option>
-                      ))
-                  )}
+                  {(ramData.sizes || []).map((opt, idx) => (
+                    <option key={idx} value={opt}>{opt}</option>
+                  ))}
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="ram_type" className="text-sm">Tipo RAM</Label>
+                <Label htmlFor="ram_type" className="text-xs mb-1 block">Tipo</Label>
                 <Select
                   id="ram_type"
                   name="ram_type"
                   onChange={(e) => setFieldValue('ram_type', e.target.value)}
                   value={values.ram_type}
-                  disabled={loadingRAM}
                   sizing="sm"
                 >
                   <option value="">Seleccionar...</option>
-                  {loadingRAM ? (
-                    <option>Cargando...</option>
-                  ) : (
-                    ramOptions
-                      .filter(opt => opt.metadata?.type)
-                      .reduce((unique, opt) => {
-                        if (!unique.find(u => u.metadata.type === opt.metadata.type)) {
-                          unique.push(opt);
-                        }
-                        return unique;
-                      }, [])
-                      .map((opt) => (
-                        <option key={opt._id} value={opt.metadata.type}>
-                          {opt.metadata.type}
-                        </option>
-                      ))
-                  )}
+                  {(ramData.types || []).map((opt, idx) => (
+                     <option key={idx} value={opt}>{opt}</option>
+                  ))}
                 </Select>
               </div>
             </div>
           </div>
 
-          {/* Procesador - Agrupado con datos de BD */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+          {/* Fila 4: Procesador (Ancho Completo para evitar huecos por altura) */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <div className="mb-2 block">
               <Label className="text-base">Procesador (CPU)</Label>
             </div>
-            <div className="space-y-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
+
+
               <div>
-                <Label htmlFor="processor_brand" className="text-sm">Marca CPU</Label>
+                <Label htmlFor="processor_brand" className="text-xs mb-1 block">Marca</Label>
                 <Select
                   id="processor_brand"
                   name="processor_brand"
-                  onChange={(e) => setFieldValue('processor_brand', e.target.value)}
+                  onChange={(e) => {
+                      setFieldValue('processor_brand', e.target.value);
+                      setFieldValue('processor_family', ''); // Reset family
+                      setFieldValue('processor_generation', ''); // Reset generation
+                  }}
                   value={values.processor_brand}
-                  disabled={loadingProcessors}
                   sizing="sm"
                 >
                   <option value="">Seleccionar...</option>
-                  {loadingProcessors ? (
-                    <option>Cargando...</option>
-                  ) : (
-                    processorOptions
-                      .filter(opt => opt.metadata?.brand)
-                      .reduce((unique, opt) => {
-                        if (!unique.find(u => u.metadata.brand === opt.metadata.brand)) {
-                          unique.push(opt);
-                        }
-                        return unique;
-                      }, [])
-                      .map((opt) => (
-                        <option key={opt._id} value={opt.metadata.brand}>
-                          {opt.metadata.brand}
-                        </option>
-                      ))
-                  )}
+                  {(processorData.brands || []).map((opt, idx) => {
+                    const val = typeof opt === 'string' ? opt : opt.value;
+                    return <option key={idx} value={val}>{val}</option>;
+                  })}
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="processor_family" className="text-sm">Familia CPU</Label>
+                <Label htmlFor="processor_family" className="text-xs mb-1 block">Familia</Label>
                 <Select
                   id="processor_family"
                   name="processor_family"
-                  onChange={(e) => setFieldValue('processor_family', e.target.value)}
+                  onChange={(e) => {
+                      setFieldValue('processor_family', e.target.value);
+                      setFieldValue('processor_generation', ''); // Reset generation
+                  }}
                   value={values.processor_family || ''}
-                  disabled={loadingProcessors || !values.processor_brand}
+                  disabled={!values.processor_brand}
                   sizing="sm"
                 >
                   <option value="">Seleccionar...</option>
-                  {loadingProcessors ? (
-                    <option>Cargando...</option>
-                  ) : (
-                    processorOptions
-                      .filter(opt => 
-                        opt.metadata?.brand === values.processor_brand && 
-                        opt.metadata?.family
-                      )
-                      .reduce((unique, opt) => {
-                        if (!unique.find(u => u.metadata.family === opt.metadata.family)) {
-                          unique.push(opt);
-                        }
-                        return unique;
-                      }, [])
-                      .map((opt) => (
-                        <option key={opt._id} value={opt.metadata.family}>
-                          {opt.metadata.family}
-                        </option>
-                      ))
-                  )}
+                  {(processorData.families || [])
+                    .filter(item => {
+                        if (!values.processor_brand) return true;
+                        if (typeof item === 'string') return true; // Show legacy strings always? Or hide? 
+                        // User wants strictness. But hiding legacy makes them unusable.
+                        // Middle ground: Show legacy strings, but enforce parents for new/edited objects.
+                        // Actually, if we show legacy strings, "Ryzen" appears under "Intel".
+                        // Let's filter strictly for objects, and loosely for strings (or maybe just show strings if we match name? No).
+                        // Decision: Show strings. User must migrate data to enforce strictness fully.
+                        return item.parent === values.processor_brand; 
+                    })
+                    .map((opt, idx) => {
+                        const val = typeof opt === 'string' ? opt : opt.value;
+                        return <option key={idx} value={val}>{val}</option>;
+                  })}
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="processor_generation" className="text-sm">Generación CPU</Label>
+                <Label htmlFor="processor_generation" className="text-xs mb-1 block">Generación</Label>
                 <Select
                   id="processor_generation"
                   name="processor_generation"
                   onChange={(e) => setFieldValue('processor_generation', e.target.value)}
                   value={values.processor_generation || ''}
-                  disabled={loadingProcessors || !values.processor_family}
+                  disabled={!values.processor_family} // Disable if no family selected
                   sizing="sm"
                 >
                   <option value="">Seleccionar...</option>
-                  {loadingProcessors ? (
-                    <option>Cargando...</option>
-                  ) : (
-                    processorOptions
-                      .filter(opt => 
-                        opt.metadata?.brand === values.processor_brand &&
-                        opt.metadata?.family === values.processor_family &&
-                        opt.metadata?.generation
-                      )
-                      .map((opt) => (
-                        <option key={opt._id} value={opt.metadata.generation}>
-                          {opt.metadata.generation}
-                        </option>
-                      ))
-                  )}
+                  {(processorData.generations || [])
+                    .filter(item => {
+                        if (!values.processor_family) return true;
+                        if (typeof item === 'string') return true; 
+                        return item.parent === values.processor_family; 
+                    })
+                    .map((opt, idx) => {
+                        const val = typeof opt === 'string' ? opt : opt.value;
+                        return <option key={idx} value={val}>{val}</option>;
+                  })}
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="processor_model" className="text-sm">Modelo Específico (Opcional)</Label>
+                <Label htmlFor="processor_model" className="text-xs mb-1 block">Modelo (Opcional)</Label>
                 <TextInput
                   id="processor_model"
                   name="processor_model"
@@ -700,7 +696,8 @@ export const FormComponent = () => {
             </div>
           </div>
 
-          {/* Almacenamiento - Múltiples Unidades */}
+
+          {/* Fila 5: Almacenamiento (Ancho Completo) */}
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <div className="mb-2 flex justify-between items-center">
               <Label className="text-base">Unidades de Almacenamiento</Label>
@@ -718,9 +715,9 @@ export const FormComponent = () => {
             
             <div className="space-y-3">
               {(values.storageUnits || [{ size: '', storage_type: '' }]).map((unit, index) => (
-                <div key={index} className="grid grid-cols-5 gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <div key={index} className="grid grid-cols-5 gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <div className="col-span-2">
-                    <Label htmlFor={`storage_size_${index}`} className="text-xs">Capacidad</Label>
+                    <Label htmlFor={`storage_size_${index}`} className="text-xs mb-1 block">Capacidad</Label>
                     <Select
                       id={`storage_size_${index}`}
                       value={unit.size}
@@ -729,32 +726,17 @@ export const FormComponent = () => {
                         newUnits[index].size = e.target.value;
                         setFieldValue('storageUnits', newUnits);
                       }}
-                      disabled={loadingStorage}
                       sizing="sm"
                     >
                       <option value="">Seleccionar...</option>
-                      {loadingStorage ? (
-                        <option>Cargando...</option>
-                      ) : (
-                        storageOptions
-                          .filter(opt => opt.metadata?.capacity)
-                          .reduce((unique, opt) => {
-                            if (!unique.find(u => u.metadata.capacity === opt.metadata.capacity)) {
-                              unique.push(opt);
-                            }
-                            return unique;
-                          }, [])
-                          .map((opt) => (
-                            <option key={opt._id} value={opt.metadata.capacity}>
-                              {opt.metadata.capacity}
-                            </option>
-                          ))
-                      )}
+                       {(storageData.capacities || []).map((opt, idx) => (
+                          <option key={idx} value={opt}>{opt}</option>
+                       ))}
                     </Select>
                   </div>
 
                   <div className="col-span-2">
-                    <Label htmlFor={`storage_type_${index}`} className="text-xs">Tipo</Label>
+                    <Label htmlFor={`storage_type_${index}`} className="text-xs mb-1 block">Tipo</Label>
                     <Select
                       id={`storage_type_${index}`}
                       value={unit.storage_type}
@@ -763,42 +745,28 @@ export const FormComponent = () => {
                         newUnits[index].storage_type = e.target.value;
                         setFieldValue('storageUnits', newUnits);
                       }}
-                      disabled={loadingStorage}
                       sizing="sm"
                     >
                       <option value="">Seleccionar...</option>
-                      {loadingStorage ? (
-                        <option>Cargando...</option>
-                      ) : (
-                        storageOptions
-                          .filter(opt => opt.metadata?.storageType)
-                          .reduce((unique, opt) => {
-                            if (!unique.find(u => u.metadata.storageType === opt.metadata.storageType)) {
-                              unique.push(opt);
-                            }
-                            return unique;
-                          }, [])
-                          .map((opt) => (
-                            <option key={opt._id} value={opt.metadata.storageType}>
-                              {opt.metadata.storageType}
-                            </option>
-                          ))
-                      )}
+                      {(storageData.types || []).map((opt, idx) => (
+                          <option key={idx} value={opt}>{opt}</option>
+                       ))}
                     </Select>
                   </div>
 
                   <div className="col-span-1 flex items-end">
-                    {values.storageUnits.length > 1 && (
+                    {(values.storageUnits?.length || 0) > 1 && (
                       <Button
                         type="button"
                         color="failure"
                         size="xs"
+                        className="w-full"
                         onClick={() => {
                           const newUnits = values.storageUnits.filter((_, i) => i !== index);
                           setFieldValue('storageUnits', newUnits);
                         }}
                       >
-                        Eliminar
+                       <span className="sr-only">Eliminar</span> X
                       </Button>
                     )}
                   </div>

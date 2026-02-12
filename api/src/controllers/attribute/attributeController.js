@@ -1,176 +1,220 @@
 import AttributeModel from '../../models/Attribute.cjs';
 
 /**
- * Obtener atributos con paginación y filtros
- */
-export const getAttributes = async (req, res) => {
-  const { page, limit } = req.query;
-  const filters = req.body;
-
-  if (!page || !limit) {
-    return res.status(400).json({ message: 'Faltan datos de paginación' });
-  }
-
-  const options = {
-    page,
-    limit,
-    sort: { category: 1, value: 1 },
-  };
-
-  try {
-    const attributes = await AttributeModel.paginate(filters, options);
-    return res.status(200).json(attributes);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener atributos' });
-  }
-};
-
-/**
- * Obtener atributos por categoría (sin paginación, para selects)
+ * Get attributes by category (returns the aggregated object)
  */
 export const getAttributesByCategory = async (req, res) => {
   const { category } = req.params;
 
   try {
-    const attributes = await AttributeModel.find({
-      category,
-      active: true,
-    }).sort({ value: 1 });
+    let attributeDoc = await AttributeModel.findOne({ category });
 
-    return res.status(200).json(attributes);
+    // If not found, return empty structure or create one on fly?
+    // Let's return empty structure to be safe, or null. Frontend should handle it.
+    if (!attributeDoc) {
+      return res.status(200).json({ category, data: {} });
+    }
+
+    return res.status(200).json(attributeDoc);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al obtener atributos por categoría' });
+    res.status(500).json({ message: 'Error fetching attributes by category' });
   }
 };
 
 /**
- * Crear nuevo atributo
+ * Add a value to a specific list within a category
+ * Body: { category: 'processors', key: 'brands', value: 'Intel' }
  */
-export const createAttribute = async (req, res) => {
-  const data = req.body;
+export const addValueToCategory = async (req, res) => {
+  const { category, key, value } = req.body;
+
+  if (!category || !key || !value) {
+    return res.status(400).json({ message: 'Missing required fields: category, key, value' });
+  }
 
   try {
-    // Validar que la categoría sea válida
-    const validCategories = ['processors', 'ram', 'storage', 'so', 'brands'];
-    if (!validCategories.includes(data.category)) {
-      return res.status(400).json({
-        message: 'Categoría inválida',
-      });
+    // Find doc or create if doesn't exist
+    let attributeDoc = await AttributeModel.findOne({ category });
+
+    if (!attributeDoc) {
+      attributeDoc = new AttributeModel({ category, data: {} });
     }
 
-    // Verificar duplicados
-    const existing = await AttributeModel.findOne({
-      category: data.category,
-      value: data.value,
-    });
-
-    if (existing) {
-      return res.status(409).json({
-        message: 'Ya existe un atributo con ese valor en esta categoría',
-      });
+    // Ensure the key exists in data map
+    if (!attributeDoc.data.has(key)) {
+      attributeDoc.data.set(key, []);
     }
 
-    const newAttribute = await AttributeModel.create(data);
-    res.status(201).json({
-      attribute: newAttribute,
-      message: 'Atributo creado con éxito',
+    // Get the array
+    const list = attributeDoc.data.get(key);
+
+    // Check for duplicates
+    if (list.includes(value)) {
+      return res.status(409).json({ message: 'Value already exists in this list' });
+    }
+
+    // Add value and sort
+    list.push(value);
+    list.sort();
+
+    // Update map
+    attributeDoc.data.set(key, list);
+
+    // Explicitly mark 'data' as modified to ensure Mongoose saves the change
+    attributeDoc.markModified('data');
+
+    await attributeDoc.save();
+
+    res.status(200).json({
+      message: 'Value added successfully',
+      attribute: attributeDoc
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al crear atributo' });
+    res.status(500).json({ message: 'Error adding value to category' });
   }
 };
 
 /**
- * Actualizar atributo existente
+ * Update a value in a specific list within a category
+ * Body: { category: 'processors', key: 'brands', oldValue: 'Intel', newValue: 'Intey', newParent: optional }
  */
-export const updateAttribute = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+export const updateValueInCategory = async (req, res) => {
+  const { category, key, oldValue, newValue, newParent } = req.body;
 
   try {
-    // Verificar que el atributo existe
-    const attribute = await AttributeModel.findById(id);
-    if (!attribute) {
-      return res.status(404).json({ message: 'Atributo no encontrado' });
+    const attributeDoc = await AttributeModel.findOne({ category });
+
+    if (!attributeDoc || !attributeDoc.data.has(key)) {
+      return res.status(404).json({ message: 'Category or list not found' });
     }
 
-    // Si se está cambiando el valor, verificar duplicados
-    if (data.value && data.value !== attribute.value) {
-      const existing = await AttributeModel.findOne({
-        category: attribute.category,
-        value: data.value,
-        _id: { $ne: id },
-      });
+    const list = attributeDoc.data.get(key);
 
-      if (existing) {
-        return res.status(409).json({
-          message: 'Ya existe un atributo con ese valor en esta categoría',
-        });
+    // Find index
+    const index = list.findIndex(item => {
+      if (typeof item === 'string') return item === oldValue;
+      return item.value === oldValue;
+    });
+
+    if (index === -1) {
+      return res.status(404).json({ message: 'Value not found to update' });
+    }
+
+    // Prepare updated item
+    let updatedItem = list[index];
+    if (typeof updatedItem === 'string') {
+      // If it was string, and we are updating to string
+      if (!newParent) {
+        updatedItem = newValue || oldValue;
+      } else {
+        // upgrading to object
+        updatedItem = { value: newValue || oldValue, parent: newParent };
       }
+    } else {
+      // Was object
+      updatedItem = { ...updatedItem, value: newValue || updatedItem.value };
+      if (newParent !== undefined) updatedItem.parent = newParent;
     }
 
-    const updatedAttribute = await AttributeModel.findByIdAndUpdate(
-      id,
-      data,
-      { new: true, runValidators: true },
-    );
+    list[index] = updatedItem;
+
+    // Sort if possible (simple sort might break with mixed types)
+    // list.sort(); 
+
+    attributeDoc.data.set(key, list);
+    // Mark modified because mixed types or deep changes might not be detected automatically
+    attributeDoc.markModified('data');
+    await attributeDoc.save();
 
     res.status(200).json({
-      attribute: updatedAttribute,
-      message: 'Atributo actualizado con éxito',
+      message: 'Value updated successfully',
+      attribute: attributeDoc
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al actualizar atributo' });
+    res.status(500).json({ message: 'Error updating value' });
   }
 };
 
 /**
- * Eliminar atributo (soft delete)
+ * Remove a value from a specific list within a category
+ * Body: { category: 'processors', key: 'brands', value: 'Intel' }
  */
+export const removeValueFromCategory = async (req, res) => {
+  const { category, key, value } = req.body;
+
+  try {
+    const attributeDoc = await AttributeModel.findOne({ category });
+
+    if (!attributeDoc || !attributeDoc.data.has(key)) {
+      return res.status(404).json({ message: 'Category or list not found' });
+    }
+
+    const list = attributeDoc.data.get(key);
+    // Filtering logic capable of handling objects and specific parents
+    const newList = list.filter(item => {
+      const itemValue = typeof item === 'string' ? item : item.value;
+      const itemParent = typeof item === 'string' ? undefined : item.parent;
+
+      if (itemValue !== value) return true; // Keep if value doesn't match
+
+      // If value matches, check if parent matches specifically
+      // If the request has 'parent' (e.g. 'Core i5'), we delete only if itemParent === 'Core i5'
+      if (req.body.parent !== undefined) {
+        return itemParent !== req.body.parent;
+      }
+
+      // If request has NO parent (legacy delete or targeting legacy string), we delete if itemParent is also undefined
+      // If we want to support deleting ALL occurrences regardless of parent when parent is not provided, we just return false here.
+      // But safer is to only delete legacy strings if no parent provided.
+      // However, existing frontal logic might have relied on simple value match.
+      // Let's assume strictness: if parent is not provided in request, we delete items that HAVE NO parent (strings or objects with no parent).
+      return itemParent !== undefined;
+    });
+
+    if (newList.length === list.length) {
+      return res.status(404).json({ message: 'Value not found in list (or parent mismatch)' });
+    }
+
+    attributeDoc.data.set(key, newList);
+    attributeDoc.markModified('data');
+    await attributeDoc.save();
+
+    res.status(200).json({
+      message: 'Value removed successfully',
+      attribute: attributeDoc
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error removing value from category' });
+  }
+};
+
+// Deprecated or unused endpoints can be kept as stubs or removed
+export const getAttributes = async (req, res) => {
+  // Return all categories
+  try {
+    const docs = await AttributeModel.find({});
+    res.status(200).json(docs);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching all attributes' });
+  }
+};
+
+export const createAttribute = async (req, res) => {
+  // Redirect to addValue logic if called, or deprecate
+  res.status(410).json({ message: 'Endpoint deprecated. Use /add-value' });
+};
+
+export const updateAttribute = async (req, res) => {
+  res.status(410).json({ message: 'Endpoint deprecated.' });
+};
+
 export const deleteAttribute = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const attribute = await AttributeModel.findById(id);
-    if (!attribute) {
-      return res.status(404).json({ message: 'Atributo no encontrado' });
-    }
-
-    // Soft delete: marcar como inactivo
-    await AttributeModel.findByIdAndUpdate(id, { active: false });
-
-    res.status(200).json({
-      message: 'Atributo eliminado con éxito',
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al eliminar atributo' });
-  }
-};
-
-/**
- * Eliminar permanentemente un atributo
- */
-export const hardDeleteAttribute = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const attribute = await AttributeModel.findById(id);
-    if (!attribute) {
-      return res.status(404).json({ message: 'Atributo no encontrado' });
-    }
-
-    await AttributeModel.findByIdAndDelete(id);
-
-    res.status(200).json({
-      message: 'Atributo eliminado permanentemente',
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al eliminar atributo' });
-  }
+  res.status(410).json({ message: 'Endpoint deprecated. Use /remove-value' });
 };

@@ -32,9 +32,11 @@ export const Catalogo = () => {
   } = useQuery({
     queryKey: ['catalogueProducts', currentPage, filters],
     queryFn: () => getProducts(dataPost),
+    retry: 2,
+    retryDelay: 1000,
     onError: (error) => {
-      toast.error('Ups, algo salió mal. Inténtalo más tarde.');
       console.error('Error fetching products:', error);
+      toast.error('No se pudo conectar con el servidor. Por favor, verifica tu conexión.');
     },
   });
 
@@ -59,10 +61,24 @@ export const Catalogo = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center w-full min-h-screen">
-        <p className="text-mainLight-text dark:text-mainDark-text">
-          {error.message || 'Error al cargar los productos.'}
-        </p>
+      <div className="flex flex-col justify-center items-center w-full min-h-screen gap-4">
+        <div className="text-center max-w-md">
+          <svg className="mx-auto h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h3 className="text-lg font-semibold text-mainLight-text dark:text-mainDark-text mb-2">
+            Error de Conexión
+          </h3>
+          <p className="text-mainLight-text dark:text-mainDark-text mb-4">
+            No se pudo conectar con el servidor. Por favor, verifica que el backend esté ejecutándose.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {error.message || 'Error desconocido'}
+          </p>
+        </div>
+        <Button onClick={() => window.location.reload()}>
+          Reintentar
+        </Button>
       </div>
     );
   }

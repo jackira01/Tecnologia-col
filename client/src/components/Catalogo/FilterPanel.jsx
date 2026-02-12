@@ -141,10 +141,15 @@ const CollapsibleSection = ({ title, children, defaultOpen = false }) => {
 
 export const FilterPanel = ({ filters = {}, onFilterChange, onClearFilters }) => {
   // Fetch price range from all products
-  const { data: allProductsData } = useQuery({
+  const { data: allProductsData, isError: isErrorProducts } = useQuery({
     queryKey: ['allProducts'],
     queryFn: () => getProducts({ page: 1, limit: 1000, filters: { active: true } }),
     staleTime: 1000 * 60 * 5,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Error fetching products for filters:', error);
+    },
   });
 
   // Calculate dynamic price range
@@ -215,18 +220,33 @@ export const FilterPanel = ({ filters = {}, onFilterChange, onClearFilters }) =>
     queryKey: ['attributes', 'ram'],
     queryFn: () => getAttributesByCategory('ram'),
     staleTime: 1000 * 60 * 5,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Error fetching RAM attributes:', error);
+    },
   });
 
   const { data: storageOptions = [] } = useQuery({
     queryKey: ['attributes', 'storage'],
     queryFn: () => getAttributesByCategory('storage'),
     staleTime: 1000 * 60 * 5,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Error fetching storage attributes:', error);
+    },
   });
 
   const { data: processorOptions = [] } = useQuery({
     queryKey: ['attributes', 'processors'],
     queryFn: () => getAttributesByCategory('processors'),
     staleTime: 1000 * 60 * 5,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Error fetching processor attributes:', error);
+    },
   });
 
   // Extract unique values safely
