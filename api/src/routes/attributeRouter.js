@@ -4,26 +4,26 @@ import {
   createAttribute,
   updateAttribute,
   deleteAttribute,
-  hardDeleteAttribute,
   getAttributesByCategory,
+  addValueToCategory,
+  updateValueInCategory,
+  removeValueFromCategory,
 } from '../controllers/attribute/attributeController.js';
 
 export const attributeRouter = Router();
 
-// Obtener atributos con paginación
+// Obtener atributos con paginación (Deprecated/Stub)
 attributeRouter.post('/', getAttributes);
 
-// Obtener atributos por categoría (para selects)
+// Obtener atributos por categoría (para selects y visualización)
 attributeRouter.get('/category/:category', getAttributesByCategory);
 
-// Crear nuevo atributo
+// Rutas nuevas para modelo agregado
+attributeRouter.post('/add-value', addValueToCategory);
+attributeRouter.post('/update-value', updateValueInCategory);
+attributeRouter.post('/remove-value', removeValueFromCategory);
+
+// Rutas legacy (Deprecadas)
 attributeRouter.post('/create', createAttribute);
-
-// Actualizar atributo
 attributeRouter.post('/update/:id', updateAttribute);
-
-// Soft delete
 attributeRouter.delete('/delete/:id', deleteAttribute);
-
-// Hard delete (permanente)
-attributeRouter.delete('/delete-permanent/:id', hardDeleteAttribute);

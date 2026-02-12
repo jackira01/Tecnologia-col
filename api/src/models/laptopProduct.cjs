@@ -26,10 +26,19 @@ const LaptopProductSchema = new Schema(
       enum: ['vendido', 'disponible'],
     },
     active: Boolean,
+    acquisitionType: {
+      type: String,
+      enum: ['owned', 'consignment', 'co_investment'],
+      default: 'owned',
+    },
     price: {
       minimun: NUMBER_TYPE_REQUIRE,
       buy: NUMBER_TYPE_REQUIRE,
       sale: NUMBER_TYPE_REQUIRE,
+      myInvestment: {
+        type: Number,
+        default: 0,
+      },
       soldOn: {
         type: Number,
         require: true,

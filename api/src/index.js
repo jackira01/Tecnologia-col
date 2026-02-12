@@ -11,6 +11,7 @@ import { insightsRouter } from './routes/insightsRouter.js';
 import { loanRouter } from './routes/loanRouter.js';
 import { expenseRouter } from './routes/expenseRouter.js';
 import { leadRouter } from './routes/leadRouter.js';
+import { transactionRouter } from './routes/transactionRouter.js';
 
 
 
@@ -52,6 +53,7 @@ server.use('/insights', insightsRouter);
 server.use('/loan', loanRouter);
 server.use('/expense', expenseRouter);
 server.use('/leads', leadRouter);
+server.use('/capital', transactionRouter);
 
 
 server.use('/welcome', (req, res) => {

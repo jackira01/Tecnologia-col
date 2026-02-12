@@ -144,7 +144,7 @@ export const getSalesStats = async (req, res) => {
             },
           ],
 
-          // Inventario total
+          // Inventario total (Mi Inversión Real)
           totalInventory: [
             {
               $match: { disponibility: 'disponible' },
@@ -154,7 +154,13 @@ export const getSalesStats = async (req, res) => {
                 _id: null,
                 totalValue: {
                   $sum: {
-                    $add: ['$price.buy', { $ifNull: ['$price.otherExpenses', 0] }],
+                    $cond: {
+                      if: { $eq: ['$acquisitionType', 'co_investment'] },
+                      then: '$price.myInvestment',
+                      else: {
+                        $add: ['$price.buy', { $ifNull: ['$price.otherExpenses', 0] }],
+                      },
+                    },
                   },
                 },
                 count: { $sum: 1 },
@@ -162,25 +168,43 @@ export const getSalesStats = async (req, res) => {
             },
           ],
 
-          // Ganancias totales
+          // Ganancias totales (Mi Utilidad Real)
           totalProfit: [
             {
               $match: { disponibility: 'vendido' },
+            },
+            {
+              $addFields: {
+                // Costo total de adquisición
+                totalAcquisitionCost: {
+                  $add: ['$price.buy', { $ifNull: ['$price.otherExpenses', 0] }],
+                },
+              },
+            },
+            {
+              $addFields: {
+                // Utilidad total del equipo
+                itemTotalProfit: {
+                  $subtract: ['$price.soldOn', '$totalAcquisitionCost'],
+                },
+                // Porcentaje de participación (100% si no es co-inversión)
+                ownershipPercentage: {
+                  $cond: {
+                    if: { $eq: ['$acquisitionType', 'co_investment'] },
+                    then: {
+                      $divide: ['$price.myInvestment', '$totalAcquisitionCost'],
+                    },
+                    else: 1,
+                  },
+                },
+              },
             },
             {
               $group: {
                 _id: null,
                 totalProfit: {
                   $sum: {
-                    $subtract: [
-                      '$price.soldOn',
-                      {
-                        $add: [
-                          '$price.buy',
-                          { $ifNull: ['$price.otherExpenses', 0] },
-                        ],
-                      },
-                    ],
+                    $multiply: ['$itemTotalProfit', '$ownershipPercentage'],
                   },
                 },
                 totalRevenue: { $sum: '$price.soldOn' },

@@ -14,7 +14,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 # Stage 2: Production runtime
-FROM node:20-alpine
+FROM node:20-alpine AS production
 
 # Set working directory
 WORKDIR /app

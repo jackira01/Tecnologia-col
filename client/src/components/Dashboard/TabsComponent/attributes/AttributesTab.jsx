@@ -1,7 +1,5 @@
-'use client';
-
 import { useQuery } from '@tanstack/react-query';
-import { getAttributes } from '@/services/attributes';
+import { getAttributesByCategory } from '@/services/attributes';
 import { Spinner, Button, Badge } from 'flowbite-react';
 import { useState } from 'react';
 import { IoAddCircleOutline } from 'react-icons/io5';
@@ -9,46 +7,42 @@ import AttributeList from './AttributeList';
 import AttributeModal from './AttributeModal';
 
 const AttributesTab = () => {
-  const [currentPage, setCurrentPage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
-  const [currentAttribute, setCurrentAttribute] = useState(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('processors'); // Default to first category
+  const [selectedList, setSelectedList] = useState(''); // For modal context (e.g. adding to 'brands')
+  const [editingItem, setEditingItem] = useState(null); // { key: 'brands', value: 'Intel' } or { key: 'families', value: { value: 'Core i5', parent: 'Intel' } }
 
-  // Query para obtener atributos
+  const [initialParent, setInitialParent] = useState(''); // New state for pre-filling parent
+
+  // Query para obtener el objeto de la categoría seleccionada
   const {
-    data: attributesData,
+    data: attributeDoc,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ['attributes', currentPage, categoryFilter],
-    queryFn: () =>
-      getAttributes({
-        page: currentPage,
-        limit: 10,
-        filters: categoryFilter !== 'all' ? { category: categoryFilter } : {},
-      }),
+    queryKey: ['attributes', categoryFilter],
+    queryFn: () => getAttributesByCategory(categoryFilter),
     refetchOnMount: false,
   });
 
-  const attributes = attributesData?.docs || [];
-  const totalPages = attributesData?.totalPages || 1;
-
-  const handleCreate = () => {
-    setCurrentAttribute(null);
-    setIsEdit(false);
+  const handleCreate = (listKey = '', parentValue = '') => {
+    setSelectedList(listKey);
+    setInitialParent(parentValue); // Set the parent
+    setEditingItem(null);
     setOpenModal(true);
   };
 
-  const handleEdit = (attribute) => {
-    setCurrentAttribute(attribute);
-    setIsEdit(true);
+  const handleEdit = (listKey, item) => {
+    // If item is string, normalize to object structure temporarily for modal
+    const valueObj = typeof item === 'string' ? { value: item } : item;
+    setSelectedList(listKey);
+    setInitialParent(''); // Reset initial parent on edit
+    setEditingItem({ key: listKey, ...valueObj });
     setOpenModal(true);
   };
 
   const categoryLabels = {
-    all: 'Todos',
     processors: 'Procesadores',
     ram: 'Memoria RAM',
     storage: 'Almacenamiento',
@@ -74,80 +68,48 @@ const AttributesTab = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header con botón crear */}
+      {/* Header con botón crear general (opcional, o por lista) */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Configuración de Atributos
         </h2>
-        <Button onClick={handleCreate} size="sm">
-          <IoAddCircleOutline className="mr-2 h-5 w-5" />
-          Crear Atributo
-        </Button>
+        {/* Helper text or global add button if needed */}
       </div>
 
-      {/* Filtros por categoría */}
-      <div className="flex gap-2 flex-wrap">
+      {/* Tabs por categoría */}
+      <div className="flex gap-2 flex-wrap border-b pb-2 dark:border-gray-700">
         {Object.entries(categoryLabels).map(([key, label]) => (
           <Button
             key={key}
-            size="xs"
+            size="sm"
             color={categoryFilter === key ? 'blue' : 'gray'}
-            onClick={() => {
-              setCategoryFilter(key);
-              setCurrentPage(1);
-            }}
+            onClick={() => setCategoryFilter(key)}
+            className="rounded-full"
           >
             {label}
-            {key !== 'all' && categoryFilter === key && (
-              <Badge color="blue" className="ml-2">
-                {attributes.length}
-              </Badge>
-            )}
           </Button>
         ))}
       </div>
 
-      {/* Lista de atributos */}
-      {attributes.length === 0 ? (
-        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-          No hay atributos en esta categoría. Crea uno para comenzar.
-        </div>
-      ) : (
-        <AttributeList
-          attributes={attributes}
-          onEdit={handleEdit}
-        />
-      )}
-
-      {/* Paginación simple */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          <Button
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Anterior
-          </Button>
-          <span className="flex items-center px-4 text-gray-700 dark:text-gray-300">
-            Página {currentPage} de {totalPages}
-          </span>
-          <Button
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Siguiente
-          </Button>
-        </div>
-      )}
+      {/* Contenido de la categoría */}
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+         <AttributeList
+           attributeDoc={attributeDoc}
+           category={categoryFilter}
+           onAdd={handleCreate}
+           onEdit={handleEdit}
+         />
+      </div>
 
       {/* Modal de creación/edición */}
       <AttributeModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        attribute={currentAttribute}
-        isEdit={isEdit}
+        category={categoryFilter}
+        defaultList={selectedList}
+        existingData={attributeDoc?.data || {}}
+        editingItem={editingItem}
+        initialParent={initialParent}
       />
     </div>
   );
