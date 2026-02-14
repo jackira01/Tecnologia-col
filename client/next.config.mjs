@@ -5,6 +5,7 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
+  turbopack: {},
   // Suprimir warning de deprecación de url.parse() de dependencias
   webpack: (config, { isServer }) => {
     if (isServer) {
