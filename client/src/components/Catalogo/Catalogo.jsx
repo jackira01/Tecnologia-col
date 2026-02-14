@@ -1,3 +1,5 @@
+'use client';
+
 import { ProductContext } from '@/context/productContext';
 import { getProducts } from '@/services/products';
 import { Spinner, Button } from 'flowbite-react';
