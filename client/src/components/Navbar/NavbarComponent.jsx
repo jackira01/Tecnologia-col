@@ -50,9 +50,8 @@ export const NavbarComponent = () => {
         <Image
           width={150}
           height={50}
-          src="/mini_icon.png"
-          className=""
-          alt="Flowbite Logo"
+          src="/logo.png"
+          alt="Logo"
         />
       </NavbarBrand>
       <div className="flex md:order-2">
