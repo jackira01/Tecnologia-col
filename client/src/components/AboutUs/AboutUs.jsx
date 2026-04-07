@@ -7,13 +7,12 @@ export default function AboutUs() {
           ¿Quiénes Somos?
         </h2>
         <p className="mb-4">
-          Con más de{' '}
+          Somos un negocio ubicado en{' '}
           <span className="font-semibold text-blue-600 dark:text-mainDark-text">
-            30 años de experiencia
-          </span>{' '}
-          en el mercado, Tecnologia Col se ha consolidado como líder en Ibagué,
-          Tolima, en la venta de equipos informáticos de segunda mano y
-          servicios técnicos especializados.
+            Ibagué, Tolima
+          </span>
+          , especializado en la venta de equipos informáticos de segunda mano y
+          servicios técnicos especializados para particulares y pequeñas empresas.
         </p>
         <p className="text-gray-700 dark:text-mainDark-white">
           Nuestra misión es{' '}
@@ -66,8 +65,8 @@ export default function AboutUs() {
             Ibagué, Tolima
           </span>
           , atendiendo tanto a particulares como a pequeñas empresas con la
-          misma calidad y compromiso que nos ha caracterizado por más de tres
-          décadas.
+          misma calidad y compromiso que nos ha caracterizado durante más de
+          tres décadas de trabajo en la región.
         </p>
       </section>
     </dev>
