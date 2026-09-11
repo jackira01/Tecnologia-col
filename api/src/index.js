@@ -15,12 +15,28 @@ import { transactionRouter } from './routes/transactionRouter.js';
 
 
 
-const { PORT, ORIGIN_ALLOWED, MONGODB_URI, ENVIROMENT } = process.env;
+const { PORT, ORIGIN_ALLOWED, FRONT_URL, MONGODB_URI, ENVIROMENT } = process.env;
 
 const server = express();
 
-//Configure for specific origins
-const whitelist = JSON.parse(ORIGIN_ALLOWED || '[]');
+// Configure allowed origins from a JSON array, a comma-separated list, or FRONT_URL.
+const parseOrigins = (value) => {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch {
+    return value.split(',');
+  }
+};
+
+const whitelist = [
+  ...parseOrigins(ORIGIN_ALLOWED),
+  ...parseOrigins(FRONT_URL),
+]
+  .filter((origin) => typeof origin === 'string' && origin.trim())
+  .map((origin) => origin.trim().replace(/\/$/, ''));
 
 const corsOptions = {
   origin: (origin, callback) => {
